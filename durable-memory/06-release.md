@@ -6,6 +6,6 @@ Pushing a `v*` tag runs the `release` job, which collects the five binaries, lic
 
 Static linking: Linux `-static`; macOS cannot link libSystem statically so only libstdc++/libgcc concerns are absent (Apple clang uses system libc++); Windows `-static` with MinGW.
 
-Status: only the Linux x64 path has been run locally. The other four platforms are unverified until the first CI run; expect to debug MinGW/macOS issues in Corrade/Magnum configure or in `atomic-file.cpp`.
+Status: all five platforms build and pass test.sh in CI (first green run on main, 2026-10-23).
 
 License: MIT (Magnum, Corrade, cpp-dsl-sdk and lmcad are MIT, so the combined binary is MIT-compatible with no copyleft obligations beyond the glibc/GCC runtime notes in THIRD_PARTY_NOTICES.md).
