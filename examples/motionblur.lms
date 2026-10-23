@@ -1,0 +1,24 @@
+# Motion blur
+# Magnum example "Motion blur" (https://magnum.graphics/doc/magnum/examples-motionblur.html), reproduced headless: accumulates 16 sub-frames of a moving sphere (the host's accumulate()), like the original's frame accumulation.
+out = ARGV.len() > 0 ? ARGV[0] : "build/motionblur.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.05, 0.06, 0.09);
+let m = material().color(0.9, 0.7, 0.2).specular(0.5);
+let s = scene.sphere(0.5, m);
+scene.camera(35.0, 0.0, 1.0, 8.0, 0.0, 0.0, 0.0);
+scene.directional_light(-0.4, -1.0, -0.5, 0.9);
+scene.reset_accumulation();
+for (i in range(0, 16)) {
+  s.translate(-2.0 + float(i) * 0.27, 0.0, 0.0);
+  scene.accumulate(480, 270);
+}
+scene.save_accumulated_png("images/motionblur.png");
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/motionblur.png");

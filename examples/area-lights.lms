@@ -1,0 +1,24 @@
+# Area Lights
+# Magnum example "Area Lights" (https://magnum.graphics/doc/magnum/examples-arealights.html), reproduced headless: the host has one directional light plus ambient, so an area light is approximated by a bright ambient term and a soft key; a floor and three spheres show the result.
+out = ARGV.len() > 0 ? ARGV[0] : "build/area-lights.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.02, 0.02, 0.03);
+scene.ambient(0.35);
+let floor = material().color(0.6, 0.6, 0.62).specular(0.1);
+let ball = material().color(0.9, 0.9, 0.95).specular(0.7).shininess(60.0);
+scene.plane(12.0, floor).rotate(-90.0, 0.0, 0.0).translate(0.0, -1.0, 0.0);
+for (i in range(0, 3)) {
+  scene.sphere(0.9, ball).translate((float(i) - 1.0) * 2.4, 0.0, 0.0);
+}
+scene.camera(40.0, 0.0, 2.5, 9.0, 0.0, -0.2, 0.0);
+scene.directional_light(-0.2, -1.0, -0.3, 0.6);
+scene.render_png("images/area-lights.png", 800, 400);
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/area-lights.png");

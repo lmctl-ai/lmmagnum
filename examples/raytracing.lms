@@ -1,0 +1,33 @@
+# Ray Tracing
+# Magnum example "Ray Tracing" (https://magnum.graphics/doc/magnum/examples-raytracing.html), reproduced headless: the same sphere-heavy subject; the host rasterizes instead of tracing rays, so there are no reflections or shadows.
+out = ARGV.len() > 0 ? ARGV[0] : "build/raytracing.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.5, 0.7, 0.95);
+let ground = material().color(0.35, 0.65, 0.35).specular(0.0);
+scene.plane(60.0, ground).rotate(-90.0, 0.0, 0.0).translate(0.0, -1.0, 0.0);
+let red = material().color(0.9, 0.2, 0.2).specular(0.6);
+let blue = material().color(0.2, 0.4, 0.9).specular(0.6);
+let yellow = material().color(0.9, 0.8, 0.2).specular(0.6);
+for (i in range(0, 12)) {
+  let x = float(i % 4) * 2.6 - 3.9;
+  let z = float(i / 4) * -2.6;
+  if (i % 3 == 0) {
+    scene.sphere(1.0, red).translate(x, 0.0, z);
+  } else if (i % 3 == 1) {
+    scene.sphere(1.0, blue).translate(x, 0.0, z);
+  } else {
+    scene.sphere(1.0, yellow).translate(x, 0.0, z);
+  }
+}
+scene.camera(45.0, 0.0, 2.5, 8.0, 0.0, 0.0, -2.0);
+scene.directional_light(-0.4, -1.0, -0.5, 0.95);
+scene.render_png("images/raytracing.png", 800, 450);
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/raytracing.png");

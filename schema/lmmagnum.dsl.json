@@ -1,0 +1,377 @@
+{
+  "dsl.schema": 2,
+  "name": "lmmagnum",
+  "types": {
+    "Scene": {
+      "methods": {
+        "cube": [
+          {
+            "params": [
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "box": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "sphere": [
+          {
+            "params": [
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "icosphere": [
+          {
+            "params": [
+              "float",
+              "int",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "cylinder": [
+          {
+            "params": [
+              "float",
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "cone": [
+          {
+            "params": [
+              "float",
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "capsule": [
+          {
+            "params": [
+              "float",
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "plane": [
+          {
+            "params": [
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "camera": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Camera"
+          }
+        ],
+        "directional_light": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Light"
+          }
+        ],
+        "background": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Scene"
+          }
+        ],
+        "render_png": [
+          {
+            "params": [
+              "string",
+              "int",
+              "int"
+            ],
+            "returns": "void"
+          }
+        ],
+        "render_ppm": [
+          {
+            "params": [
+              "string",
+              "int",
+              "int"
+            ],
+            "returns": "void"
+          }
+        ],
+        "export_stl": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "void"
+          }
+        ],
+        "export_obj": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "void"
+          }
+        ],
+        "export_ply": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "void"
+          }
+        ],
+        "triangle_count": [
+          {
+            "params": [],
+            "returns": "int"
+          }
+        ],
+        "shape_count": [
+          {
+            "params": [],
+            "returns": "int"
+          }
+        ],
+        "triangle": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "ambient": [
+          {
+            "params": [
+              "float"
+            ],
+            "returns": "Scene"
+          }
+        ],
+        "accumulate": [
+          {
+            "params": [
+              "int",
+              "int"
+            ],
+            "returns": "void"
+          }
+        ],
+        "save_accumulated_png": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "void"
+          }
+        ],
+        "reset_accumulation": [
+          {
+            "params": [],
+            "returns": "void"
+          }
+        ]
+      }
+    },
+    "Shape": {
+      "methods": {
+        "translate": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "rotate": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "scale": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "visible": [
+          {
+            "params": [
+              "bool"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "name": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "color": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "triangle_count": [
+          {
+            "params": [],
+            "returns": "int"
+          }
+        ]
+      }
+    },
+    "Material": {
+      "methods": {
+        "color": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Material"
+          }
+        ],
+        "roughness": [
+          {
+            "params": [
+              "float"
+            ],
+            "returns": "Material"
+          }
+        ],
+        "specular": [
+          {
+            "params": [
+              "float"
+            ],
+            "returns": "Material"
+          }
+        ],
+        "shininess": [
+          {
+            "params": [
+              "float"
+            ],
+            "returns": "Material"
+          }
+        ]
+      }
+    },
+    "Camera": {
+      "methods": {
+        "look_at": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Camera"
+          }
+        ]
+      }
+    },
+    "Light": {
+      "methods": {
+        "intensity": [
+          {
+            "params": [
+              "float"
+            ],
+            "returns": "Light"
+          }
+        ]
+      }
+    }
+  },
+  "functions": {
+    "material": [
+      {
+        "params": [],
+        "returns": "Material"
+      }
+    ],
+    "magnum_version": [
+      {
+        "params": [],
+        "returns": "string"
+      }
+    ]
+  },
+  "context": {
+    "scene": "Scene"
+  }
+}

@@ -1,0 +1,54 @@
+# DSL reference (schema v0)
+
+Generated from `schema/lmmagnum.dsl.json`; context variable `scene: Scene`.
+
+| Call | Returns |
+|---|---|
+| `Scene.cube(float, Material)` | `Shape` |
+| `Scene.box(float, float, float, Material)` | `Shape` |
+| `Scene.sphere(float, Material)` | `Shape` |
+| `Scene.icosphere(float, int, Material)` | `Shape` |
+| `Scene.cylinder(float, float, Material)` | `Shape` |
+| `Scene.cone(float, float, Material)` | `Shape` |
+| `Scene.capsule(float, float, Material)` | `Shape` |
+| `Scene.plane(float, Material)` | `Shape` |
+| `Scene.camera(float, float, float, float, float, float, float)` | `Camera` |
+| `Scene.directional_light(float, float, float, float)` | `Light` |
+| `Scene.background(float, float, float)` | `Scene` |
+| `Scene.render_png(string, int, int)` | `void` |
+| `Scene.render_ppm(string, int, int)` | `void` |
+| `Scene.export_stl(string)` | `void` |
+| `Scene.export_obj(string)` | `void` |
+| `Scene.export_ply(string)` | `void` |
+| `Scene.triangle_count()` | `int` |
+| `Scene.shape_count()` | `int` |
+| `Scene.triangle(float, float, float, float, float, float, float, float, float, Material)` | `Shape` |
+| `Scene.ambient(float)` | `Scene` |
+| `Scene.accumulate(int, int)` | `void` |
+| `Scene.save_accumulated_png(string)` | `void` |
+| `Scene.reset_accumulation()` | `void` |
+| `Shape.translate(float, float, float)` | `Shape` |
+| `Shape.rotate(float, float, float)` | `Shape` |
+| `Shape.scale(float, float, float)` | `Shape` |
+| `Shape.visible(bool)` | `Shape` |
+| `Shape.name(string)` | `Shape` |
+| `Shape.color(float, float, float)` | `Shape` |
+| `Shape.triangle_count()` | `int` |
+| `Material.color(float, float, float)` | `Material` |
+| `Material.roughness(float)` | `Material` |
+| `Material.specular(float)` | `Material` |
+| `Material.shininess(float)` | `Material` |
+| `Camera.look_at(float, float, float, float, float, float)` | `Camera` |
+| `Light.intensity(float)` | `Light` |
+| `material()` | `Material` |
+| `magnum_version()` | `string` |
+
+## Conventions
+
+- Lengths are scene units; angles are degrees; colours are 0..1 floats.
+- Cube/box/plane sizes are full edge lengths; sphere/cone/cylinder take a radius (and a full height); capsule takes `radius, length` but `length` is currently ignored (unit capsule scaled by radius).
+- `Shape.rotate` sets absolute Euler angles (applied Z, then Y, then X); `translate`/`scale` also set, not accumulate. The Shape handle returned by every constructor can be re-posed between frames.
+- `render_png`/`render_ppm` render all shapes except those set `visible(false)` with 2x2 supersampling; size limit 8192 per side, 16 Mpixel.
+- `accumulate(w,h)` renders and adds a frame into a float accumulator; `save_accumulated_png` writes the mean (motion blur). Call `reset_accumulation()` to start over or change size.
+- Limits: 4096 shapes and 4096 materials per run. Host errors surface as the standard one-line JSON, exit 3.
+- Inside `_dsl_` there is no `assert`, ternary, arrays, or `println`; use `if/else`, `for (i in range(a,b))`, `str()`, string `+`, `float()`, `sin/cos` etc. Outside the block (plain lmscript) `assert`, `system`, `println` exist.

@@ -1,0 +1,7 @@
+/build/
+/build-static/
+*.dslb
+/third_party/
+/p1.txt
+/images/
+/lmmagnum.lmctl

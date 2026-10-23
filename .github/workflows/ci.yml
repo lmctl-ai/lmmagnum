@@ -1,0 +1,210 @@
+name: ci
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ["v*"]
+    paths-ignore: ["durable-memory/**", "**.md"]
+  pull_request:
+    paths-ignore: ["durable-memory/**", "**.md"]
+
+# Build jobs compile third-party source and run npm; they only need read access.
+# The tag-only release job owns the write token.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  linux-x64:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ninja-build
+      - name: install published lmscript compiler (DSL v5)
+        run: |
+          npm install --global @lmctl-ai/lmctl@0.2.401
+          scripts/select-compiler.sh
+      - name: build and test
+        run: ./test.sh
+      - name: stage release binary
+        run: |
+          mkdir -p dist
+          cp build/lmmagnum dist/lmmagnum-linux-x64
+          scripts/stage-release-notices.sh dist
+          wc -c < dist/lmmagnum-linux-x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lmmagnum-linux-x64
+          path: dist/
+          if-no-files-found: error
+
+  linux-arm64:
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: toolchain
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ninja-build
+      - name: install published lmscript compiler (DSL v5)
+        run: |
+          npm install --global @lmctl-ai/lmctl@0.2.401
+          scripts/select-compiler.sh
+      - name: build and test
+        run: ./test.sh
+      - name: stage release binary
+        run: |
+          mkdir -p dist
+          cp build/lmmagnum dist/lmmagnum-linux-arm64
+          scripts/stage-release-notices.sh dist
+          wc -c < dist/lmmagnum-linux-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lmmagnum-linux-arm64
+          path: dist/
+          if-no-files-found: error
+
+  macos-arm64:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: toolchain
+        run: brew install ninja
+      - name: install published lmscript compiler (DSL v5)
+        run: |
+          npm install --global @lmctl-ai/lmctl@0.2.401
+          scripts/select-compiler.sh
+      - name: build and test
+        run: ./test.sh
+      - name: stage release binary
+        run: |
+          mkdir -p dist
+          cp build/lmmagnum dist/lmmagnum-macos-arm64
+          scripts/stage-release-notices.sh dist
+          wc -c < dist/lmmagnum-macos-arm64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lmmagnum-macos-arm64
+          path: dist/
+          if-no-files-found: error
+
+  macos-x64:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: toolchain
+        run: brew install ninja
+      - name: install published lmscript compiler (DSL v5)
+        run: |
+          npm install --global @lmctl-ai/lmctl@0.2.401
+          scripts/select-compiler.sh
+      - name: build and test
+        run: ./test.sh
+      - name: stage release binary
+        run: |
+          mkdir -p dist
+          cp build/lmmagnum dist/lmmagnum-macos-x64
+          scripts/stage-release-notices.sh dist
+          wc -c < dist/lmmagnum-macos-x64
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lmmagnum-macos-x64
+          path: dist/
+          if-no-files-found: error
+
+  windows-x64:
+    runs-on: windows-2022
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: toolchain (MinGW-w64 GCC + Ninja)
+        run: |
+          for i in 1 2 3; do
+            choco install -y mingw ninja && break
+            echo "choco attempt $i failed; retrying"; sleep 20
+          done
+          echo "C:/ProgramData/mingw64/mingw64/bin" >> "$GITHUB_PATH"
+          echo "CC=gcc" >> "$GITHUB_ENV"
+          echo "CXX=g++" >> "$GITHUB_ENV"
+      - name: install published lmscript compiler (DSL v5)
+        run: |
+          npm install --global @lmctl-ai/lmctl@0.2.401
+          scripts/select-compiler.sh
+      - name: build and test
+        run: ./test.sh
+      - name: stage release binary
+        run: |
+          mkdir -p dist
+          cp build/lmmagnum.exe dist/lmmagnum-windows-x64.exe
+          scripts/stage-release-notices.sh dist
+          wc -c < dist/lmmagnum-windows-x64.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lmmagnum-windows-x64
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [linux-x64, linux-arm64, macos-arm64, macos-x64, windows-x64]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+      - name: collect assets
+        run: |
+          mkdir release
+          # one executable per platform (asset names are lmscript's HOST-OS-ARCH[.exe]);
+          # license files are identical across platforms, ship them once.
+          find artifacts -type f \( -name 'lmmagnum-*' \) -exec cp {} release/ \;
+          cp artifacts/lmmagnum-linux-x64/LICENSE artifacts/lmmagnum-linux-x64/THIRD_PARTY_NOTICES artifacts/lmmagnum-linux-x64/Magnum-COPYING artifacts/lmmagnum-linux-x64/Corrade-COPYING release/
+          chmod +x release/lmmagnum-linux-* release/lmmagnum-macos-*
+          (cd release && sha256sum lmmagnum-* > SHA256SUMS)
+          ls -l release
+      - name: publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" release/* --repo "$GITHUB_REPOSITORY" --title "lmmagnum $TAG" --generate-notes --verify-tag

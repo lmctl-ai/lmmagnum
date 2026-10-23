@@ -1,0 +1,30 @@
+# Model Viewer
+# Magnum example "Model Viewer" (https://magnum.graphics/doc/magnum/examples-viewer.html), reproduced headless: a small scene graph of posed shapes (a toy robot) instead of an imported model; exported to OBJ so any viewer can open it.
+out = ARGV.len() > 0 ? ARGV[0] : "build/model-viewer.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.12, 0.13, 0.16);
+let body = material().color(0.7, 0.72, 0.78).specular(0.5);
+let eye = material().color(0.1, 0.8, 0.9).specular(0.8);
+let floor = material().color(0.25, 0.27, 0.3).specular(0.0);
+scene.plane(10.0, floor).rotate(-90.0, 0.0, 0.0).translate(0.0, -1.5, 0.0);
+scene.box(1.4, 1.8, 1.0, body).translate(0.0, 0.0, 0.0);
+scene.sphere(0.6, body).translate(0.0, 1.5, 0.0);
+scene.sphere(0.12, eye).translate(-0.2, 1.6, 0.55);
+scene.sphere(0.12, eye).translate(0.2, 1.6, 0.55);
+scene.cylinder(0.18, 1.4, body).translate(-1.0, 0.1, 0.0).rotate(0.0, 0.0, 15.0);
+scene.cylinder(0.18, 1.4, body).translate(1.0, 0.1, 0.0).rotate(0.0, 0.0, -15.0);
+scene.cylinder(0.22, 1.2, body).translate(-0.4, -1.4, 0.0);
+scene.cylinder(0.22, 1.2, body).translate(0.4, -1.4, 0.0);
+scene.camera(35.0, 4.0, 2.5, 7.0, 0.0, 0.2, 0.0);
+scene.directional_light(-0.5, -1.0, -0.6, 0.9);
+scene.render_png("images/model-viewer.png", 640, 640);
+scene.export_obj("build/model-viewer.obj");
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/model-viewer.png");

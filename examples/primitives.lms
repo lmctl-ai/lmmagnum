@@ -1,0 +1,25 @@
+# Primitives
+# Magnum example "Primitives" (https://magnum.graphics/doc/magnum/examples-primitives.html), reproduced headless: every solid primitive the host exposes from Magnum::Primitives, viewed from one camera.
+out = ARGV.len() > 0 ? ARGV[0] : "build/primitives.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.08, 0.09, 0.12);
+let c = material().color(0.85, 0.45, 0.2).specular(0.4);
+scene.cube(1.0, c).translate(-3.0, 0.0, 0.0).rotate(20.0, 30.0, 0.0);
+scene.sphere(0.6, c).translate(-1.5, 0.0, 0.0);
+scene.icosphere(0.6, 2, c).translate(0.0, 0.0, 0.0);
+scene.cylinder(0.5, 1.2, c).translate(1.5, 0.0, 0.0);
+scene.cone(0.5, 1.2, c).translate(3.0, 0.0, 0.0);
+scene.capsule(0.4, 1.0, c).translate(0.0, -1.6, 0.0);
+scene.camera(40.0, 0.0, 1.5, 9.0, 0.0, -0.5, 0.0);
+scene.directional_light(-0.5, -1.0, -0.4, 0.9);
+scene.render_png("images/primitives.png", 800, 400);
+scene.export_obj("build/primitives.obj");
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/primitives.png");
