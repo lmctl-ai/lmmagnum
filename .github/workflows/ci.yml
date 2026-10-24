@@ -23,12 +23,37 @@ defaults:
     shell: bash
 
 jobs:
+  version:
+    runs-on: ubuntu-24.04
+    outputs:
+      v: ${{ steps.v.outputs.v }}
+      release: ${{ steps.v.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      # Every push to main is a release: MAJOR.MINOR comes from the repo, the patch is the workflow run number.
+      # A pushed v* tag releases that exact version. Pull requests and manual runs never release.
+      - id: v
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            echo "v=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"; echo "release=true" >> "$GITHUB_OUTPUT"
+          elif [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/main ]]; then
+            echo "v=$(scripts/stamp-version.sh --base).$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"; echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "v=" >> "$GITHUB_OUTPUT"; echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+
   linux-x64:
+    needs: version
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: stamp release version
+        if: needs.version.outputs.v != ''
+        run: scripts/stamp-version.sh "${{ needs.version.outputs.v }}"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -55,11 +80,15 @@ jobs:
           if-no-files-found: error
 
   linux-arm64:
+    needs: version
     runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: stamp release version
+        if: needs.version.outputs.v != ''
+        run: scripts/stamp-version.sh "${{ needs.version.outputs.v }}"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -86,11 +115,15 @@ jobs:
           if-no-files-found: error
 
   macos-arm64:
+    needs: version
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: stamp release version
+        if: needs.version.outputs.v != ''
+        run: scripts/stamp-version.sh "${{ needs.version.outputs.v }}"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -115,11 +148,15 @@ jobs:
           if-no-files-found: error
 
   macos-x64:
+    needs: version
     runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: stamp release version
+        if: needs.version.outputs.v != ''
+        run: scripts/stamp-version.sh "${{ needs.version.outputs.v }}"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -144,11 +181,15 @@ jobs:
           if-no-files-found: error
 
   windows-x64:
+    needs: version
     runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - name: stamp release version
+        if: needs.version.outputs.v != ''
+        run: scripts/stamp-version.sh "${{ needs.version.outputs.v }}"
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -180,9 +221,11 @@ jobs:
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: [linux-x64, linux-arm64, macos-arm64, macos-x64, windows-x64]
+    if: needs.version.outputs.release == 'true'
+    needs: [version, linux-x64, linux-arm64, macos-arm64, macos-x64, windows-x64]
     runs-on: ubuntu-24.04
+    env:
+      REL_VERSION: ${{ needs.version.outputs.v }}
     permissions:
       contents: write
     steps:
@@ -205,6 +248,10 @@ jobs:
       - name: publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
+          TAG: v${{ needs.version.outputs.v }}
         run: |
-          gh release create "$TAG" release/* --repo "$GITHUB_REPOSITORY" --title "lmmagnum $TAG" --generate-notes --verify-tag
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" release/* -R "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create "$TAG" release/* -R "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --latest --title "lmmagnum $TAG" --generate-notes
+          fi
