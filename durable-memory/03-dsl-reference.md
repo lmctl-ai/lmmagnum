@@ -28,6 +28,7 @@ Generated from `schema/lmmagnum.dsl.json`; context variable `scene: Scene`.
 | `Scene.shape_count()` | `int` |
 | `Scene.triangle(float, float, float, float, float, float, float, float, float, Material)` | `Shape` |
 | `Scene.ambient(float)` | `Scene` |
+| `Scene.shadows(bool)` | `Scene` |
 | `Scene.accumulate(int, int)` | `void` |
 | `Scene.save_accumulated_png(string)` | `void` |
 | `Scene.reset_accumulation()` | `void` |
@@ -62,5 +63,6 @@ Generated from `schema/lmmagnum.dsl.json`; context variable `scene: Scene`.
 - Scene graph: a `Group` is a shared transform (translate/rotate/scale, same Euler order as shapes). `Shape.parent(g)` / `Group.parent(g)` attach to it; the world matrix is the product of the whole chain, used by rendering and every exporter. A parent that would form a cycle is an error.
 - `Scene.text(s, h, m)` builds voxel text from a built-in 5x7 font (A-Z, 0-9 and `. , ! ? - : ' / + = ( ) _`; lowercase is upper-cased, unknown characters become `?`), `h` units tall, one pixel deep, lower-left of the first glyph at the shape origin, 1 to 256 characters.
 - `tube_between(x1,y1,z1,x2,y2,z2,r,m)` is a capped cylinder between two points, baked in world space (its own `translate`/`rotate` still apply on top); `ring(inner,outer,m)` is a flat double-sided annulus in the XZ plane.
+- `shadows(true)` adds a shadow map for the directional light: an orthographic depth pass over every visible shape (2048 x 2048, slope-scaled bias, 3 x 3 PCF); it darkens the key light's diffuse and specular, not ambient or the fill light.
 - Limits: 4096 shapes and 4096 materials per run. Host errors surface as the standard one-line JSON, exit 3.
 - Inside `_dsl_` there is no `assert`, ternary, arrays, or `println`; use `if/else`, `for (i in range(a,b))`, `str()`, string `+`, `float()`, `sin/cos` etc. Outside the block (plain lmscript) `assert`, `system`, `println` exist.

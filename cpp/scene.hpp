@@ -28,7 +28,7 @@ struct Shape {
   Matrix4 transformation() const;
 };
 struct Camera { float fov=45.f; Vector3 eye{3.f,3.f,5.f}, target{}; };
-struct Light { Vector3 direction{-.55f,-1.f,-.4f}; float intensity=.9f; float ambient=.18f; };
+struct Light { Vector3 direction{-.55f,-1.f,-.4f}; float intensity=.9f; float ambient=.18f; bool shadows=false; };
 struct Image { int width=0, height=0; std::vector<unsigned char> rgb; };
 
 Mesh make_triangle(Vector3 a, Vector3 b, Vector3 c); Mesh make_cube(); Mesh make_sphere(unsigned rings); Mesh make_icosphere(unsigned subdivisions);

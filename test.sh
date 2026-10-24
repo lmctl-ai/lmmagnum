@@ -18,7 +18,7 @@ diff -u <("$LMSCRIPT" --dsl-signatures schema/lmmagnum.dsl.json | tr -d '\r') <(
 # Run every example in a scratch directory and check each produced a PNG/GIF/OBJ.
 export PATH="$HERE/$BUILD_DIR:$PATH"
 mkdir "$WORK/run"; ( cd "$WORK/run"; for f in "$HERE"/examples/*.lms; do "$LMSCRIPT" "$f" >/dev/null || fail "example $(basename "$f")"; done )
-for png in triangle textured-quad primitives primitives-scene-graph text model-viewer area-lights raytracing octree motionblur pbr-spheres depthtesting material-sandbox lightbulb caffeine-molecule ball-stick buckyball dna-double-helix cornell-box saturn-rings truss-bridge; do
+for png in triangle textured-quad primitives primitives-scene-graph text model-viewer area-lights raytracing octree motionblur pbr-spheres depthtesting material-sandbox lightbulb caffeine-molecule ball-stick buckyball dna-double-helix cornell-box saturn-rings truss-bridge shadows multidraw cubemap bullet fluidsimulation3d fluidsimulation2d textured-triangle; do
   [ "$(head -c 4 "$WORK/run/images/$png.png" | tail -c 3)" = "PNG" ] || fail "images/$png.png is not a PNG"; done
 [ -s "$WORK/run/build/primitives.obj" ] || fail "OBJ export"; ok "all examples ran and wrote valid output"
 if [ "${LMMAGNUM_FULL_STATIC:-ON}" = ON ] && [ "$(uname -s)" = Linux ]; then

@@ -86,6 +86,7 @@ void register_host(dslvm::Registry& r,Host& h) {
   checked_method(r,"Scene","triangle",{"float","float","float","float","float","float","float","float","float","Material"},"Shape",[&h](void*,Args& a){
     for(int i=0;i<9;i++) finite(a[i].f,"triangle vertex"); Vector3 p0=vec(a,0),p1=vec(a,3),p2=vec(a,6);
     if(Magnum::Math::cross(p1-p0,p2-p0).dot()==0.f) throw dslvm::Error("triangle must not be degenerate"); return make(h,make_triangle(p0,p1,p2),mat(a,9),"triangle"); });
+  checked_method(r,"Scene","shadows",{"bool"},"Scene",[&h](void* self,Args& a){ h.light.shadows=a[0].b; return Value::object("Scene",self); });
   checked_method(r,"Scene","ambient",{"float"},"Scene",[&h](void* self,Args& a){ finite(a[0].f,"ambient"); if(a[0].f<0) throw dslvm::Error("ambient must not be negative"); h.light.ambient=float(a[0].f); return Value::object("Scene",self); });
   checked_method(r,"Scene","reset_accumulation",{},"void",[&h](void*,Args&){ h.accum.clear(); h.accum_n=0; return Value::none(); });
   checked_method(r,"Scene","accumulate",{"int","int"},"void",[&h,dims](void*,Args& a){

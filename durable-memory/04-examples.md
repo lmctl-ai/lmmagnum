@@ -29,5 +29,12 @@ The Magnum index (https://magnum.graphics/doc/magnum/example-index.html) is most
 | `cornell-box.lms` | lmblender `cornell-box` | room, two blocks, lamp | global illumination (colour bleeding) |
 | `saturn-rings.lms` | lmblender `saturn-rings` | oblate planet + four `Scene.ring` bands | ring shadow |
 | `truss-bridge.lms` | lmcad `truss-bridge` | Pratt truss, member colour/radius from the closed-form forces | lmplot elevation |
+| `shadows.lms` | Shadows | floor + four solids, shadow map (`scene.shadows(true)`, 2048^2, 3x3 PCF) | cascaded shadow maps |
+| `multidraw.lms` | Multi Draw | 180 meshes of four kinds in six rings | one GPU multi-draw call |
+| `cubemap.lms` | Cube Map | six-face room around glossy spheres | cube-map sampling and reflections |
+| `bullet.lms` | Bullet Physics | 64 boxes with closed-form fall and bounce (restitution 0.5) | rigid-body dynamics and collisions |
+| `fluidsimulation3d.lms` | 3D Fluid Simulation | 32 ABC-flow streamlines as tube chains | the particle solver |
+| `fluidsimulation2d.lms` | 2D Fluid Simulation | opposite vortex pair, 40 streamlines | the interactive solver |
+| `textured-triangle.lms` | Textured Triangle | checker of 64 sub-triangles | image import and sampling |
 
-Not reproduced: Audio, Bullet/DART/Box2D physics, 2D/3D fluid simulation, ImGui, Mouse Interaction, Object Picking, Text rendering, Cube Map, Shadow map, Multi Draw, Vulkan and WebXR examples, plain-GLFW and sokol triangles. They require a GL/Vulkan device, windowing, input, audio, fonts, or third-party libraries that the one-static-binary goal excludes.
+Not reproduced: Audio, DART and Box2D (engine-backed physics; `bullet.lms` is closed-form ballistics only), ImGui, Mouse Interaction, Object Picking, the Vulkan and WebXR examples, and the plain-GLFW, sokol and Vulkan triangles (the same picture as `triangle.lms`). They need a GL/Vulkan device, windowing, input, audio or an engine the one-static-binary goal excludes.

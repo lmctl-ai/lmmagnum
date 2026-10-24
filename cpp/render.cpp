@@ -54,6 +54,39 @@ Image render(const std::vector<const Shape*>& shapes,const Camera& cam,const Lig
   Matrix4 proj=Matrix4::perspectiveProjection(Magnum::Deg(cam.fov),float(width)/float(height),.05f,10000.f);
   Matrix4 vp=proj*view;
   Vector3 to_light=-light.direction.normalized();
+  // Optional shadow map: orthographic depth along the light direction over the bounds of every visible shape.
+  struct ShadowMap { bool on=false; int R=0; std::vector<float> d; Vector3 r,u,f; float x0=0,y0=0,sx=0,sy=0,texel=0; } sm;
+  if(light.shadows) {
+    sm.f=light.direction.normalized(); Vector3 ref=std::fabs(sm.f.y())>.99f?Vector3::xAxis():Vector3::yAxis();
+    sm.r=Magnum::Math::cross(sm.f,ref).normalized(); sm.u=Magnum::Math::cross(sm.r,sm.f);
+    std::vector<Vector3> lp; std::vector<UnsignedInt> li;
+    float mnx=1e30f,mny=1e30f,mxx=-1e30f,mxy=-1e30f;
+    for(const Shape* s:shapes) { if(!s->visible) continue; Matrix4 model=s->transformation(); UnsignedInt base=UnsignedInt(lp.size());
+      for(const auto& p:s->mesh.positions){ Vector3 w=model.transformPoint(p); Vector3 q{Magnum::Math::dot(w,sm.r),Magnum::Math::dot(w,sm.u),Magnum::Math::dot(w,sm.f)};
+        lp.push_back(q); mnx=std::min(mnx,q.x()); mxx=std::max(mxx,q.x()); mny=std::min(mny,q.y()); mxy=std::max(mxy,q.y()); }
+      for(auto i:s->mesh.indices) li.push_back(base+i); }
+    if(!lp.empty()) {
+      sm.on=true; sm.R=2048; sm.d.assign(size_t(sm.R)*sm.R,std::numeric_limits<float>::infinity());
+      float ext=std::max(mxx-mnx,mxy-mny)*1.02f+1e-4f; sm.x0=mnx-(ext-(mxx-mnx))*.5f; sm.y0=mny-(ext-(mxy-mny))*.5f; sm.sx=sm.sy=float(sm.R)/ext; sm.texel=ext/float(sm.R);
+      for(size_t t=0;t+2<li.size();t+=3) {
+        Vector3 v[3]={lp[li[t]],lp[li[t+1]],lp[li[t+2]]}; float X[3],Y[3];
+        for(int k=0;k<3;k++){ X[k]=(v[k].x()-sm.x0)*sm.sx; Y[k]=(v[k].y()-sm.y0)*sm.sy; }
+        float area=(X[1]-X[0])*(Y[2]-Y[0])-(Y[1]-Y[0])*(X[2]-X[0]); if(std::fabs(area)<1e-12f) continue;
+        int ax=std::max(0,int(std::floor(std::min({X[0],X[1],X[2]})))), bx=std::min(sm.R-1,int(std::ceil(std::max({X[0],X[1],X[2]}))));
+        int ay=std::max(0,int(std::floor(std::min({Y[0],Y[1],Y[2]})))), by=std::min(sm.R-1,int(std::ceil(std::max({Y[0],Y[1],Y[2]}))));
+        for(int y=ay;y<=by;y++) for(int x=ax;x<=bx;x++) { float px=x+.5f,py=y+.5f;
+          float w0=((X[1]-px)*(Y[2]-py)-(Y[1]-py)*(X[2]-px))/area, w1=((X[2]-px)*(Y[0]-py)-(Y[2]-py)*(X[0]-px))/area, w2=1.f-w0-w1;
+          if(w0<-1e-5f||w1<-1e-5f||w2<-1e-5f) continue;
+          float z=w0*v[0].z()+w1*v[1].z()+w2*v[2].z(); float& m=sm.d[size_t(y)*sm.R+x]; if(z<m) m=z; } }
+    }
+  }
+  auto lit=[&](const Vector3& pos,float ndotl)->float {
+    if(!sm.on) return 1.f;
+    float lx=(Magnum::Math::dot(pos,sm.r)-sm.x0)*sm.sx, ly=(Magnum::Math::dot(pos,sm.u)-sm.y0)*sm.sy, lz=Magnum::Math::dot(pos,sm.f);
+    float bias=sm.texel*(2.5f+14.f*(1.f-std::clamp(ndotl,0.f,1.f))); int cx=int(std::floor(lx)), cy=int(std::floor(ly)); float s=0; int n=0;
+    for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ int x=cx+i,y=cy+j; if(x<0||y<0||x>=sm.R||y>=sm.R){ s+=1.f; n++; continue; }
+      s+=(lz-bias<=sm.d[size_t(y)*sm.R+x])?1.f:0.f; n++; }
+    return s/float(n); };
   Vector3 fill=Vector3{.8f,-.2f,.9f}.normalized()*-1.f;
   for(const Shape* shape:shapes) { if(!shape->visible) continue;
     Matrix4 model=shape->transformation(); Matrix3 nm=model.normalMatrix();
@@ -85,9 +118,10 @@ Image render(const std::vector<const Shape*>& shapes,const Camera& cam,const Lig
           n=n.dot()>0?n.normalized():fn;
           Vector3 vdir=(cam.eye-pos).normalized();
           if(Magnum::Math::dot(n,vdir)<0) n=-n; // two-sided shading
-          float diff=std::max(0.f,Magnum::Math::dot(n,to_light))*light.intensity+std::max(0.f,Magnum::Math::dot(n,fill))*.22f+light.ambient;
+          float ndl=Magnum::Math::dot(n,to_light); float shade=ndl>0.f?lit(pos,ndl):0.f;
+          float diff=std::max(0.f,ndl)*light.intensity*shade+std::max(0.f,Magnum::Math::dot(n,fill))*.22f+light.ambient;
           Vector3 h=(to_light+vdir).normalized();
-          float spec=mat.specular*std::pow(std::max(0.f,Magnum::Math::dot(n,h)),mat.shininess);
+          float spec=mat.specular*std::pow(std::max(0.f,Magnum::Math::dot(n,h)),mat.shininess)*shade;
           depth[at]=z; color[at]=Color3{mat.color*diff+Color3{spec}};
         }
       }

@@ -261,6 +261,14 @@
             ],
             "returns": "Shape"
           }
+        ],
+        "shadows": [
+          {
+            "params": [
+              "bool"
+            ],
+            "returns": "Scene"
+          }
         ]
       }
     },

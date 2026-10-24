@@ -48,10 +48,20 @@ Every picture is produced by a self-contained `.lms` program in [`examples/`](ex
 | <img src="docs/images/dna-double-helix.png" width="290"> | <img src="docs/images/cornell-box.png" width="290"> | <img src="docs/images/saturn-rings.png" width="290"> |
 | 28 base pairs, 144 degree groove geometry (from lmblender)<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/dna-double-helix.lms` | Red and green walls, two white blocks (from lmblender)<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/cornell-box.lms` | Ring radii to scale, Cassini Division (from lmblender)<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/saturn-rings.lms` |
 
-| Pratt truss footbridge |   |   |
+| Pratt truss footbridge | Shadows | Multi draw |
 | --- | --- | --- |
-| <img src="docs/images/truss-bridge.png" width="290"> |   |   |
-| Method of joints: red tension, blue compression (from lmcad)<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/truss-bridge.lms` |   |   |
+| <img src="docs/images/truss-bridge.png" width="290"> | <img src="docs/images/shadows.png" width="290"> | <img src="docs/images/multidraw.png" width="290"> |
+| Method of joints: red tension, blue compression (from lmcad)<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/truss-bridge.lms` | Floor and four solids with a shadow map<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/shadows.lms` | 180 meshes of four kinds in six rings<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/multidraw.lms` |
+
+| Cube map | Bullet (analytic) | 3D fluid flow |
+| --- | --- | --- |
+| <img src="docs/images/cubemap.png" width="290"> | <img src="docs/images/bullet.png" width="290"> | <img src="docs/images/fluidsimulation3d.png" width="290"> |
+| Six-face room around glossy spheres<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/cubemap.lms` | 64 boxes falling and bouncing, closed-form ballistics<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/bullet.lms` | 32 ABC-flow streamlines coloured by speed<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/fluidsimulation3d.lms` |
+
+| 2D fluid flow | Textured triangle |   |
+| --- | --- | --- |
+| <img src="docs/images/fluidsimulation2d.png" width="290"> | <img src="docs/images/textured-triangle.png" width="290"> |   |
+| A counter-rotating vortex pair, 40 streamlines<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/fluidsimulation2d.lms` | A checker of 64 sub-triangles<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-triangle.lms` |   |
 
 Also in `examples/`: `arcball.lms` (a scripted orbit written as 12 PNG frames). [`durable-memory/04-examples.md`](durable-memory/04-examples.md) lists what each example keeps and drops, and which Magnum examples cannot be reproduced.
 
