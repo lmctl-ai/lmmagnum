@@ -63,6 +63,20 @@ Every picture is produced by a self-contained `.lms` program in [`examples/`](ex
 | <img src="docs/images/fluidsimulation2d.png" width="290"> | <img src="docs/images/textured-triangle.png" width="290"> |   |
 | A counter-rotating vortex pair, 40 streamlines<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/fluidsimulation2d.lms` | A checker of 64 sub-triangles<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-triangle.lms` |   |
 
+### Homepage clips from lmctl.com
+
+The four 10 s clips on the [lmctl.com](https://lmctl.com) homepage, one per level of the agent-automation ladder. Their scene scripts live in [lmctl-ai/lmctl](https://github.com/lmctl-ai/lmctl/tree/main/scripts/homepage/video); the published videos add lmdraw title and label overlays on top of the 3D scenes shown here. Each example writes 240 frames, then ffmpeg encodes `images/<name>.mp4` and `.gif`; the lmmagnum version is a port of the lmcad storyboard (same animation, this repo's rasterizer).
+
+| Level 1: names and teams | Level 2: agents talk through a Lead |
+| --- | --- |
+| <img src="docs/images/level-1-sessions.gif" width="440"> | <img src="docs/images/level-2-orchestration.gif" width="440"> |
+| Sessions gather into Lead, Coder and Review rows; a lens inspects one and a usage gauge rises<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/level-1-sessions.lms`<br>[MP4](docs/videos/level-1-sessions.mp4) | Provider-coloured agents orbit the Lead; message packets travel through it<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/level-2-orchestration.lms`<br>[MP4](docs/videos/level-2-orchestration.mp4) |
+
+| Level 3: a hands-off Lead | Level 4: automation |
+| --- | --- |
+| <img src="docs/images/level-3-hands-off-lead.gif" width="440"> | <img src="docs/images/level-4-automation.gif" width="440"> |
+| A requirement and its checklist enter; a reviewed result returns<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/level-3-hands-off-lead.lms`<br>[MP4](docs/videos/level-3-hands-off-lead.mp4) | A brainstorm becomes a Work, Review, QA and Acceptance pipeline<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/level-4-automation.lms`<br>[MP4](docs/videos/level-4-automation.mp4) |
+
 Also in `examples/`: `arcball.lms` (a scripted orbit written as 12 PNG frames). [`durable-memory/04-examples.md`](durable-memory/04-examples.md) lists what each example keeps and drops, and which Magnum examples cannot be reproduced.
 
 ## Build

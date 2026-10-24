@@ -35,6 +35,7 @@ The Magnum index (https://magnum.graphics/doc/magnum/example-index.html) is most
 | `bullet.lms` | Bullet Physics | 64 boxes with closed-form fall and bounce (restitution 0.5) | rigid-body dynamics and collisions |
 | `fluidsimulation3d.lms` | 3D Fluid Simulation | 32 ABC-flow streamlines as tube chains | the particle solver |
 | `fluidsimulation2d.lms` | 2D Fluid Simulation | opposite vortex pair, 40 streamlines | the interactive solver |
+| `level-1-sessions.lms` ... `level-4-automation.lms` | lmctl.com homepage clips (lmctl-ai/lmctl `scripts/homepage/video`) | the four 10 s storyboards (240 frames) ported from the lmcad scripts; ffmpeg writes MP4 + GIF | lmdraw title/label overlays |
 | `textured-triangle.lms` | Textured Triangle | checker of 64 sub-triangles | image import and sampling |
 
 Not reproduced: Audio, DART and Box2D (engine-backed physics; `bullet.lms` is closed-form ballistics only), ImGui, Mouse Interaction, Object Picking, the Vulkan and WebXR examples, and the plain-GLFW, sokol and Vulkan triangles (the same picture as `triangle.lms`). They need a GL/Vulkan device, windowing, input, audio or an engine the one-static-binary goal excludes.
