@@ -8,7 +8,7 @@ lmmagnum is a single static executable that exposes parts of Magnum (Math, Primi
 4. [04-examples.md](04-examples.md): the examples and how each maps to a Magnum sample.
 5. [05-extending.md](05-extending.md): adding a call/primitive; gotchas found so far.
 6. [06-release.md](06-release.md): CI matrix and publishing releases.
-7. [20-sibling-3d-hosts-and-conventions.md](20-sibling-3d-hosts-and-conventions.md): the four 3D repos side by side, DSL cheat sheet, porting rules, README conventions, **mandatory working conventions** (commit and push, identity, automatic releases).
+7. [20-sibling-3d-hosts.md](20-sibling-3d-hosts.md): pointer to the cross-repo reference in lmcad (host comparison, DSL cheat sheet, porting rules, shared examples).
 
 ## 60-second takeover
 
@@ -18,4 +18,4 @@ scripts/sync-deps.sh && cmake -S . -B build -G Ninja && cmake --build build
 scripts/update-readme-images.sh   # regenerate docs/images and docs/videos
 ```
 
-Change flow: schema + `register_host()` (+ `scene.cpp`/`render.cpp`), rebuild, `./test.sh`, docs, `git commit && git push origin main`.
+Change flow: schema + `register_host()` (+ `scene.cpp`/`render.cpp`), rebuild, `./test.sh`.
