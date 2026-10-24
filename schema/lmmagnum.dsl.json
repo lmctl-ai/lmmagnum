@@ -269,6 +269,38 @@
             ],
             "returns": "Scene"
           }
+        ],
+        "texture": [
+          {
+            "params": [
+              "int",
+              "int"
+            ],
+            "returns": "Texture"
+          }
+        ],
+        "texture_file": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "Texture"
+          }
+        ],
+        "texture_checker": [
+          {
+            "params": [
+              "int",
+              "int",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Texture"
+          }
         ]
       }
     },
@@ -343,6 +375,14 @@
             ],
             "returns": "Shape"
           }
+        ],
+        "texture": [
+          {
+            "params": [
+              "Texture"
+            ],
+            "returns": "Shape"
+          }
         ]
       }
     },
@@ -378,6 +418,14 @@
           {
             "params": [
               "float"
+            ],
+            "returns": "Material"
+          }
+        ],
+        "texture": [
+          {
+            "params": [
+              "Texture"
             ],
             "returns": "Material"
           }
@@ -451,6 +499,67 @@
               "Group"
             ],
             "returns": "Group"
+          }
+        ]
+      }
+    },
+    "Texture": {
+      "methods": {
+        "pixel": [
+          {
+            "params": [
+              "int",
+              "int",
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Texture"
+          }
+        ],
+        "filter": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "Texture"
+          }
+        ],
+        "wrap": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "Texture"
+          }
+        ],
+        "repeat": [
+          {
+            "params": [
+              "float",
+              "float"
+            ],
+            "returns": "Texture"
+          }
+        ],
+        "width": [
+          {
+            "params": [],
+            "returns": "int"
+          }
+        ],
+        "height": [
+          {
+            "params": [],
+            "returns": "int"
+          }
+        ],
+        "save_png": [
+          {
+            "params": [
+              "string"
+            ],
+            "returns": "void"
           }
         ]
       }

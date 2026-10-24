@@ -17,6 +17,8 @@ cpp-dsl-sdk (https://github.com/lmctl-ai/cpp-dsl-sdk) - MIT. `cpp/dslvm.hpp` is 
 
 `cpp/deflate.hpp` and `cpp/atomic-file.*` originate from lmcad (MIT).
 
+stb_image v2.30 (https://github.com/nothings/stb) - public domain (alternatively MIT, Sean Barrett). `cpp/stb_image.h` is vendored unmodified and decodes PNG, JPEG, BMP and TGA textures.
+
 Linux release binaries are fully static against glibc (LGPL-2.1+); macOS binaries
 link Apple system libraries dynamically; Windows binaries use the MinGW-w64 static
 runtime (GCC runtime library exception applies).

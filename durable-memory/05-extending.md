@@ -9,6 +9,9 @@
 ## Add a primitive
 Call the `Magnum::Primitives::*Solid` function in `scene.cpp`'s `make_*`, then bind a Scene method that bakes size via `scaled()`. This revision of Magnum has no torus.
 
+## Texture coordinates
+`Mesh::uvs` is empty or parallel to `positions`. `convert()` takes Magnum's own (`UVSphereFlag`, `CylinderFlag`, `ConeFlag`, `CapsuleFlag`, `PlaneFlag`, `CubeFlag::TextureCoordinatesAllSame`); text, ring and triangle generate theirs. The icosphere has none (shared vertices cannot carry a seam). A new primitive that should be texturable must fill `uvs`, or rendering a textured shape of that kind errors.
+
 ## Gotchas
 - Static linking needs both `CORRADE_BUILD_STATIC` and `MAGNUM_BUILD_STATIC`; the bare `BUILD_STATIC` is not enough.
 - `Trade` requires Corrade `PluginManager` even though no plugin is loaded.

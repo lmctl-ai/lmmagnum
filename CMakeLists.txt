@@ -55,7 +55,7 @@ if(NOT LMMAGNUM_MAGNUM_COMMIT)
   set(LMMAGNUM_MAGNUM_COMMIT "unknown")
 endif()
 
-add_executable(lmmagnum cpp/main.cpp cpp/scene.cpp cpp/render.cpp cpp/atomic-file.cpp)
+add_executable(lmmagnum cpp/main.cpp cpp/scene.cpp cpp/render.cpp cpp/texture.cpp cpp/atomic-file.cpp)
 set_target_properties(lmmagnum PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}" RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}")
 target_compile_definitions(lmmagnum PRIVATE LMMAGNUM_VERSION="${PROJECT_VERSION}" LMMAGNUM_MAGNUM_COMMIT="${LMMAGNUM_MAGNUM_COMMIT}")
 target_include_directories(lmmagnum PRIVATE cpp "${CMAKE_CURRENT_BINARY_DIR}/generated")

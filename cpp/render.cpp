@@ -14,8 +14,8 @@
 
 namespace lmmagnum {
 namespace {
-using Magnum::Vector4; using Magnum::Matrix3;
-struct Vertex { Vector4 clip; Vector3 world, normal; };
+using Magnum::Vector4; using Magnum::Matrix3; using Magnum::Vector2;
+struct Vertex { Vector4 clip; Vector3 world, normal; Vector2 uv; };
 unsigned char channel(float v) { return static_cast<unsigned char>(std::lround(std::clamp(v,0.f,1.f)*255.f)); }
 void put32(std::vector<unsigned char>& o,uint32_t v){o.push_back(v>>24);o.push_back(v>>16);o.push_back(v>>8);o.push_back(v);}
 uint32_t crc32(const unsigned char* p,size_t n){uint32_t c=0xffffffffu;for(size_t i=0;i<n;i++){c^=p[i];for(int b=0;b<8;b++)c=(c>>1)^(0xedb88320u&uint32_t(-int(c&1)));}return c^0xffffffffu;}
@@ -35,7 +35,7 @@ std::vector<Vertex> clip_near(const std::vector<Vertex>& in) {
   Vertex a=in.back(); float da=d(a);
   for(const auto& b:in) { float db=d(b);
     if((da>=0)!=(db>=0)) { float t=da/(da-db); Vertex v;
-      v.clip=a.clip*(1-t)+b.clip*t; v.world=a.world*(1-t)+b.world*t; v.normal=a.normal*(1-t)+b.normal*t; out.push_back(v); }
+      v.clip=a.clip*(1-t)+b.clip*t; v.world=a.world*(1-t)+b.world*t; v.normal=a.normal*(1-t)+b.normal*t; v.uv=a.uv*(1-t)+b.uv*t; out.push_back(v); }
     if(db>=0) out.push_back(b);
     a=b; da=db; }
   std::vector<Vertex> kept; for(auto& v:out) if(v.clip.w()>eps) kept.push_back(v);
@@ -91,17 +91,19 @@ Image render(const std::vector<const Shape*>& shapes,const Camera& cam,const Lig
   for(const Shape* shape:shapes) { if(!shape->visible) continue;
     Matrix4 model=shape->transformation(); Matrix3 nm=model.normalMatrix();
     const Mesh& m=shape->mesh; const Material& mat=shape->material;
+    const Texture* tex=mat.texture;
+    if(tex&&m.uvs.size()!=m.positions.size()) throw std::runtime_error("shape '"+shape->name+"' has no texture coordinates (supported: cube, box, sphere, cylinder, cone, capsule, plane, text, ring, tube, triangle)");
     for(size_t t=0;t+2<m.indices.size();t+=3) {
       std::vector<Vertex> poly(3);
       Vector3 wp[3];
       for(int k=0;k<3;k++){ auto i=m.indices[t+k]; wp[k]=model.transformPoint(m.positions[i]);
-        poly[k].world=wp[k]; poly[k].normal=(nm*m.normals[i]); poly[k].clip=vp*Vector4{wp[k],1.f}; }
+        poly[k].world=wp[k]; poly[k].normal=(nm*m.normals[i]); poly[k].clip=vp*Vector4{wp[k],1.f}; if(tex) poly[k].uv=m.uvs[i]; }
       Vector3 fn=Magnum::Math::cross(wp[1]-wp[0],wp[2]-wp[0]);
       if(fn.dot()==0.f) continue;
       fn=fn.normalized();
       poly=clip_near(poly); if(poly.size()<3) continue;
-      struct S { float x,y,z; Vector3 world,normal; float invw; };
-      std::vector<S> s; for(auto& v:poly){ float iw=1.f/v.clip.w(); s.push_back({(v.clip.x()*iw*.5f+.5f)*W,(1.f-(v.clip.y()*iw*.5f+.5f))*H,v.clip.z()*iw,v.world*iw,v.normal*iw,iw}); }
+      struct S { float x,y,z; Vector3 world,normal; Vector2 uv; float invw; };
+      std::vector<S> s; for(auto& v:poly){ float iw=1.f/v.clip.w(); s.push_back({(v.clip.x()*iw*.5f+.5f)*W,(1.f-(v.clip.y()*iw*.5f+.5f))*H,v.clip.z()*iw,v.world*iw,v.normal*iw,v.uv*iw,iw}); }
       for(size_t f=1;f+1<s.size();f++) {
         const S &a=s[0],&b=s[f],&c=s[f+1];
         float area=(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x); if(std::fabs(area)<1e-9f) continue;
@@ -122,7 +124,16 @@ Image render(const std::vector<const Shape*>& shapes,const Camera& cam,const Lig
           float diff=std::max(0.f,ndl)*light.intensity*shade+std::max(0.f,Magnum::Math::dot(n,fill))*.22f+light.ambient;
           Vector3 h=(to_light+vdir).normalized();
           float spec=mat.specular*std::pow(std::max(0.f,Magnum::Math::dot(n,h)),mat.shininess)*shade;
-          depth[at]=z; color[at]=Color3{mat.color*diff+Color3{spec}};
+          Color3 albedo=mat.color;
+          if(tex) {   // perspective-correct UV and its screen-space derivatives (finite differences) pick the mip level
+            auto uv_at=[&](float qx,float qy){ float u0=((b.x-qx)*(c.y-qy)-(b.y-qy)*(c.x-qx))/area, u1=((c.x-qx)*(a.y-qy)-(c.y-qy)*(a.x-qx))/area, u2=1.f-u0-u1;
+              float q=u0*a.invw+u1*b.invw+u2*c.invw; return (a.uv*u0+b.uv*u1+c.uv*u2)/q; };
+            Vector2 uv=uv_at(px,py), dx=uv_at(px+1.f,py)-uv, dy=uv_at(px,py+1.f)-uv;
+            float tw=float(tex->width)*tex->scale_u, th=float(tex->height)*tex->scale_v;
+            float rho=std::max(std::hypot(dx.x()*tw,dx.y()*th),std::hypot(dy.x()*tw,dy.y()*th))/float(ss);   // texels per output pixel
+            albedo=albedo*tex->sample(uv.x(),uv.y(),rho>1.f?std::log2(rho):0.f);
+          }
+          depth[at]=z; color[at]=Color3{albedo*diff+Color3{spec}};
         }
       }
     }

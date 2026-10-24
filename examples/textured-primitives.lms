@@ -1,0 +1,45 @@
+# Textured primitives
+# One procedural brick texture on every primitive that carries texture coordinates: cube, sphere, cylinder, cone, capsule, a ring and a tube. Each shape maps the same image its own way (box faces, longitude/latitude, wrapped side plus end caps, radial); `Texture.repeat` tiles it.
+out = ARGV.len() > 0 ? ARGV[0] : "build/textured-primitives.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.12, 0.13, 0.17);
+let n = 128;
+let brick = scene.texture(n, n);
+for (y in range(0, n)) {
+  for (x in range(0, n)) {
+    let row = y / 16;
+    let off = 0;
+    if (row % 2 == 1) { off = 16; }
+    let bx = (x + off) % 32;
+    let by = y % 16;
+    let r = 0.62 + 0.08 * sin(float(x * 7 + y * 3));
+    let g = 0.27 + 0.05 * sin(float(x * 5 + y * 11));
+    let b = 0.2;
+    if (bx < 2) { r = 0.78; g = 0.76; b = 0.7; }
+    if (by < 2) { r = 0.78; g = 0.76; b = 0.7; }
+    brick.pixel(x, y, r, g, b);
+  }
+}
+let floor_t = scene.texture_checker(128, 16, 0.3, 0.32, 0.38, 0.22, 0.24, 0.3).repeat(4.0, 4.0);
+let m = material().color(1.0, 1.0, 1.0).specular(0.1).texture(brick);
+scene.plane(14.0, material().color(1.0, 1.0, 1.0).specular(0.0).texture(floor_t)).rotate(-90.0, 0.0, 0.0).translate(0.0, -1.0, 0.0);
+scene.cube(1.5, m).rotate(0.0, 25.0, 0.0).translate(-3.3, -0.25, 0.0);
+scene.sphere(0.85, m).translate(-1.1, -0.15, 0.4);
+scene.cylinder(0.7, 1.8, m).translate(1.0, -0.1, 0.0);
+scene.cone(0.8, 1.9, m).translate(2.9, -0.05, 0.4);
+scene.capsule(0.55, 1.6, m).translate(-2.2, -0.2, -2.2);
+scene.tube_between(0.0, -1.0, -2.4, 0.0, 0.8, -2.4, 0.5, m);
+scene.ring(0.5, 1.0, m).rotate(35.0, 0.0, 0.0).translate(2.0, 0.3, -2.3);
+scene.camera(54.0, 0.0, 3.4, 9.5, 0.0, -0.2, 0.0);
+scene.directional_light(-0.5, -1.0, -0.6, 0.95);
+scene.shadows(true);
+scene.render_png("images/textured-primitives.png", 800, 450);
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/textured-primitives.png");

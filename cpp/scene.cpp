@@ -27,6 +27,7 @@ Mesh convert(const Magnum::Trade::MeshData& data) {
   Mesh m;
   auto p=data.positions3DAsArray(), n=data.normalsAsArray();
   m.positions.assign(p.begin(),p.end()); m.normals.assign(n.begin(),n.end());
+  if(data.hasAttribute(Magnum::Trade::MeshAttribute::TextureCoordinates)) { auto t=data.textureCoordinates2DAsArray(); m.uvs.assign(t.begin(),t.end()); }
   std::vector<UnsignedInt> seq;
   if(data.isIndexed()) { auto i=data.indicesAsArray(); seq.assign(i.begin(),i.end()); }
   else for(UnsignedInt i=0;i<UnsignedInt(p.size());i++) seq.push_back(i);
@@ -42,7 +43,7 @@ Mesh convert(const Magnum::Trade::MeshData& data) {
 }
 Mesh make_triangle(Vector3 a,Vector3 b,Vector3 c) {
   Mesh m; Vector3 n=Magnum::Math::cross(b-a,c-a); n=n.dot()>0?n.normalized():Vector3::zAxis();
-  m.positions={a,b,c}; m.normals={n,n,n}; m.indices={0,1,2}; return m;
+  m.positions={a,b,c}; m.normals={n,n,n}; m.indices={0,1,2}; m.uvs={{0.f,0.f},{1.f,0.f},{.5f,1.f}}; return m;
 }
 
 namespace {
@@ -98,6 +99,7 @@ void add_box(Mesh& m,Vector3 lo,Vector3 hi) {
 Mesh make_text(const std::string& text,float height) {
   Mesh m; const float px=height/7.f;
   float x=0;
+  const float total=float(text.size())*6*px;   // planar UVs: u along the string, v up the glyph row
   for(char ch:text) {
     if(ch==' ') { x+=6*px; continue; }
     const Glyph* g=find_glyph(ch); if(!g) g=find_glyph('?');
@@ -105,15 +107,17 @@ Mesh make_text(const std::string& text,float height) {
       add_box(m,{x+col*px,(6-row)*px,0.f},{x+(col+1)*px,(7-row)*px,px});
     x+=6*px;
   }
+  m.uvs.reserve(m.positions.size());
+  for(const auto& p:m.positions) m.uvs.push_back({total>0.f?p.x()/total:0.f,p.y()/height});
   return m;
 }
-Mesh make_cube() { return convert(Magnum::Primitives::cubeSolid()); }
-Mesh make_sphere(unsigned rings) { return convert(Magnum::Primitives::uvSphereSolid(rings,rings*2)); }
+Mesh make_cube() { return convert(Magnum::Primitives::cubeSolid(Magnum::Primitives::CubeFlag::TextureCoordinatesAllSame)); }
+Mesh make_sphere(unsigned rings) { return convert(Magnum::Primitives::uvSphereSolid(rings,rings*2,Magnum::Primitives::UVSphereFlag::TextureCoordinates)); }
 Mesh make_icosphere(unsigned subdivisions) { return convert(Magnum::Primitives::icosphereSolid(subdivisions)); }
-Mesh make_cylinder() { return convert(Magnum::Primitives::cylinderSolid(1,48,1.f,Magnum::Primitives::CylinderFlag::CapEnds)); }
-Mesh make_cone() { return convert(Magnum::Primitives::coneSolid(1,48,1.f,Magnum::Primitives::ConeFlag::CapEnd)); }
-Mesh make_capsule() { return convert(Magnum::Primitives::capsule3DSolid(8,1,48,1.f)); }
-Mesh make_plane() { return convert(Magnum::Primitives::planeSolid()); }
+Mesh make_cylinder() { return convert(Magnum::Primitives::cylinderSolid(1,48,1.f,Magnum::Primitives::CylinderFlag::CapEnds|Magnum::Primitives::CylinderFlag::TextureCoordinates)); }
+Mesh make_cone() { return convert(Magnum::Primitives::coneSolid(1,48,1.f,Magnum::Primitives::ConeFlag::CapEnd|Magnum::Primitives::ConeFlag::TextureCoordinates)); }
+Mesh make_capsule() { return convert(Magnum::Primitives::capsule3DSolid(8,1,48,1.f,Magnum::Primitives::CapsuleFlag::TextureCoordinates)); }
+Mesh make_plane() { return convert(Magnum::Primitives::planeSolid(Magnum::Primitives::PlaneFlag::TextureCoordinates)); }
 Mesh scaled(Mesh m, Vector3 f) {
   for(auto& v:m.positions) v*=f;
   for(auto& n:m.normals) n=(n/f).normalized();
@@ -136,7 +140,9 @@ Mesh make_ring(float inner,float outer,unsigned segments) {
   for(int side=0;side<2;side++) {
     UnsignedInt base=UnsignedInt(m.positions.size()); Vector3 n{0.f,side?-1.f:1.f,0.f};
     for(unsigned k=0;k<=segments;k++) { float a=two_pi*float(k)/float(segments),c=std::cos(a),s=std::sin(a);
-      m.positions.push_back({inner*c,0.f,inner*s}); m.positions.push_back({outer*c,0.f,outer*s}); m.normals.push_back(n); m.normals.push_back(n); }
+      m.positions.push_back({inner*c,0.f,inner*s}); m.positions.push_back({outer*c,0.f,outer*s}); m.normals.push_back(n); m.normals.push_back(n);
+      // u runs around the ring, v from the inner to the outer edge
+      m.uvs.push_back({float(k)/float(segments),0.f}); m.uvs.push_back({float(k)/float(segments),1.f}); }
     for(unsigned k=0;k<segments;k++) { UnsignedInt i=base+2*k;
       if(side==0) m.indices.insert(m.indices.end(),{i,i+1,i+2,i+2,i+1,i+3}); else m.indices.insert(m.indices.end(),{i,i+2,i+1,i+2,i+3,i+1}); }
   }

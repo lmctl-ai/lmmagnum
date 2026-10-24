@@ -9,6 +9,7 @@
 | `cpp/main.cpp` | `Host` state (shapes, materials, camera, light, accumulator), `register_host()` binding every schema member, CLI (`--version`, `--dsl-schema [--json]`, `--dsl-signatures`, `--dsl FILE...`) |
 | `cpp/scene.{hpp,cpp}` | `Mesh/Material/Shape/Group/Camera/Light/Image` structs (`Group` = scene-graph transform, `Shape.parent`); conversion of `Trade::MeshData` primitives into plain triangle lists; `make_tube`, `make_ring`, `make_text` (5x7 voxel font) |
 | `cpp/render.cpp` | software rasterizer, PNG/PPM writers, STL/OBJ/PLY exporters |
+| `cpp/texture.cpp`, `cpp/stb_image.h` | texture decode (vendored stb_image, PNG/JPEG/BMP/TGA only), mip chain, trilinear/nearest sampling, wrap modes, PNG save |
 | `cpp/deflate.hpp`, `cpp/atomic-file.*` | PNG zlib stream and crash-safe file writes (shared with lmcad) |
 | `third_party/{magnum,corrade}` | pinned shallow clones, git-ignored |
 

@@ -24,6 +24,7 @@ struct Host {
   std::vector<std::unique_ptr<Shape>> shapes;
   std::vector<std::unique_ptr<Material>> materials;
   std::vector<std::unique_ptr<Group>> groups;
+  std::vector<std::unique_ptr<Texture>> textures; std::size_t texture_bytes=0;
   Camera camera; Light light; LightHandle light_handle{&light};
   Color3 background{.08f,.09f,.12f};
   std::vector<double> accum; int accum_w=0, accum_h=0, accum_n=0;
@@ -35,6 +36,11 @@ struct Host {
 void finite(double x,const char* name){ if(!std::isfinite(x)) throw dslvm::Error(std::string(name)+" must be finite"); }
 void positive(double x,const char* name){ finite(x,name); if(x<=0) throw dslvm::Error(std::string(name)+" must be positive"); }
 Vector3 vec(const Args& a,size_t i){ return {float(a[i].f),float(a[i+1].f),float(a[i+2].f)}; }
+Texture& tex(const Args& a,size_t i){ return *static_cast<Texture*>(a[i].obj); }
+Value add_texture(Host& h,Texture t){
+  std::size_t bytes=t.rgb.size();
+  if(h.texture_bytes+bytes>(std::size_t(1)<<29)) throw dslvm::Error("texture memory limit exceeded (512 MiB of pixels per run)");
+  h.texture_bytes+=bytes; return h.hold(h.textures,"Texture",std::move(t)); }
 Material& mat(const Args& a,size_t i){ return *static_cast<Material*>(a[i].obj); }
 Value make(Host& h,Mesh m,const Material& mt,const char* name){ Shape s; s.mesh=std::move(m); s.material=mt; s.name=name; return h.hold(h.shapes,"Shape",std::move(s)); }
 void checked_method(dslvm::Registry& r,const char* type,const char* name,std::vector<std::string> params,std::string returns,dslvm::Method cb) {
@@ -127,6 +133,33 @@ void register_host(dslvm::Registry& r,Host& h) {
   checked_method(r,"Material","roughness",{"float"},"Material",[M](void* p,Args& a){ finite(a[0].f,"roughness"); M(p)->roughness=float(a[0].f); return Value::object("Material",p); });
   checked_method(r,"Material","specular",{"float"},"Material",[M](void* p,Args& a){ finite(a[0].f,"specular"); M(p)->specular=float(a[0].f); return Value::object("Material",p); });
   checked_method(r,"Material","shininess",{"float"},"Material",[M](void* p,Args& a){ positive(a[0].f,"shininess"); M(p)->shininess=float(a[0].f); return Value::object("Material",p); });
+  // Textures: 8-bit RGB images sampled with trilinear filtering; a material's texture multiplies its colour.
+  checked_method(r,"Scene","texture",{"int","int"},"Texture",[&h](void*,Args& a){
+    if(a[0].i<1||a[1].i<1||a[0].i>4096||a[1].i>4096) throw dslvm::Error("texture size must be between 1 and 4096 per side");
+    Texture t; t.width=int(a[0].i); t.height=int(a[1].i); t.rgb.assign(size_t(t.width)*t.height*3,255); return add_texture(h,std::move(t)); });
+  checked_method(r,"Scene","texture_file",{"string"},"Texture",[&h](void*,Args& a){ return add_texture(h,load_texture(a[0].s)); });
+  checked_method(r,"Scene","texture_checker",{"int","int","float","float","float","float","float","float"},"Texture",[&h](void*,Args& a){
+    if(a[0].i<1||a[0].i>4096) throw dslvm::Error("texture size must be between 1 and 4096"); if(a[1].i<1||a[1].i>a[0].i) throw dslvm::Error("checker cell must be between 1 and the texture size");
+    for(int i=2;i<8;i++){ finite(a[i].f,"checker colour"); if(a[i].f<0||a[i].f>1) throw dslvm::Error("checker colour must be between 0 and 1"); }
+    return add_texture(h,Texture::checker(int(a[0].i),int(a[1].i),Color3(vec(a,2)),Color3(vec(a,5)))); });
+  auto T=[](void* p){ return static_cast<Texture*>(p); };
+  checked_method(r,"Texture","pixel",{"int","int","float","float","float"},"Texture",[T](void* p,Args& a){
+    Texture* t=T(p); if(a[0].i<0||a[1].i<0||a[0].i>=t->width||a[1].i>=t->height) throw dslvm::Error("pixel coordinates are outside the texture");
+    for(int i=2;i<5;i++){ finite(a[i].f,"pixel colour"); if(a[i].f<0||a[i].f>1) throw dslvm::Error("pixel colour must be between 0 and 1"); }
+    size_t o=(size_t(a[1].i)*t->width+size_t(a[0].i))*3; for(int c=0;c<3;c++) t->rgb[o+c]=static_cast<unsigned char>(std::lround(a[2+c].f*255.0));
+    t->dirty=true; return Value::object("Texture",p); });
+  checked_method(r,"Texture","filter",{"string"},"Texture",[T](void* p,Args& a){
+    if(a[0].s=="linear") T(p)->linear=true; else if(a[0].s=="nearest") T(p)->linear=false; else throw dslvm::Error("texture filter must be \"linear\" or \"nearest\"");
+    return Value::object("Texture",p); });
+  checked_method(r,"Texture","wrap",{"string"},"Texture",[T](void* p,Args& a){
+    if(a[0].s=="repeat") T(p)->wrap=Texture::Wrap::Repeat; else if(a[0].s=="clamp") T(p)->wrap=Texture::Wrap::Clamp; else if(a[0].s=="mirror") T(p)->wrap=Texture::Wrap::Mirror;
+    else throw dslvm::Error("texture wrap must be \"repeat\", \"clamp\" or \"mirror\""); return Value::object("Texture",p); });
+  checked_method(r,"Texture","repeat",{"float","float"},"Texture",[T](void* p,Args& a){ positive(a[0].f,"repeat u"); positive(a[1].f,"repeat v"); T(p)->scale_u=float(a[0].f); T(p)->scale_v=float(a[1].f); return Value::object("Texture",p); });
+  checked_method(r,"Texture","width",{},"int",[T](void* p,Args&){ return Value::integer(T(p)->width); });
+  checked_method(r,"Texture","height",{},"int",[T](void* p,Args&){ return Value::integer(T(p)->height); });
+  checked_method(r,"Texture","save_png",{"string"},"void",[T](void* p,Args& a){ save_texture_png(a[0].s,*T(p)); return Value::none(); });
+  checked_method(r,"Material","texture",{"Texture"},"Material",[](void* p,Args& a){ static_cast<Material*>(p)->texture=&tex(a,0); return Value::object("Material",p); });
+  checked_method(r,"Shape","texture",{"Texture"},"Shape",[](void* p,Args& a){ static_cast<Shape*>(p)->material.texture=&tex(a,0); return Value::object("Shape",p); });
   checked_method(r,"Camera","look_at",{"float","float","float","float","float","float"},"Camera",[](void* p,Args& a){
     for(int i=0;i<6;i++) finite(a[i].f,"look_at"); auto* c=static_cast<Camera*>(p); Vector3 eye=vec(a,0),t=vec(a,3);
     if((t-eye).dot()==0.f) throw dslvm::Error("camera eye and target must differ"); c->eye=eye; c->target=t; return Value::object("Camera",p); });

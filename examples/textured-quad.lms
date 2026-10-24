@@ -1,25 +1,32 @@
 # Textured Quad
-# Magnum example "Textured Quad" (https://magnum.graphics/doc/magnum/examples-texturedquad.html), reproduced headless: a quad built from two triangles; image import and shaders do not exist in the host, so a checker is made from alternating tiles.
+# Magnum example "Textured Quad" (https://magnum.graphics/doc/magnum/examples-texturedquad.html): one quad (two triangles) sampled from an image. The image is painted into a Texture pixel by pixel here (u -> red, v -> green, a white grid, a dark corner marking the origin), then saved as images/textured-quad-texture.png and loaded back with texture_file, which is the same call you would use for your own PNG or JPEG.
 out = ARGV.len() > 0 ? ARGV[0] : "build/textured-quad.dslb";
 mkdir("images");
 mkdir("build");
 p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
 scene.background(0.1, 0.1, 0.12);
-let a = material().color(0.95, 0.95, 0.9).specular(0.0);
-let b = material().color(0.15, 0.2, 0.55).specular(0.0);
-for (i in range(0, 8)) {
-  for (j in range(0, 8)) {
-    let x = (float(i) - 3.5) * 0.25;
-    let y = (float(j) - 3.5) * 0.25;
-    if ((i + j) % 2 == 0) {
-      scene.plane(0.25, a).translate(x, y, 0.0);
-    } else {
-      scene.plane(0.25, b).translate(x, y, 0.0);
-    }
+let n = 128;
+let t = scene.texture(n, n);
+for (y in range(0, n)) {
+  for (x in range(0, n)) {
+    let u = float(x) / float(n - 1);
+    let v = 1.0 - float(y) / float(n - 1);
+    let r = 0.15 + 0.8 * u;
+    let g = 0.15 + 0.8 * v;
+    let b = 0.35;
+    if (x % 16 == 0) { r = 1.0; g = 1.0; b = 1.0; }
+    if (y % 16 == 0) { r = 1.0; g = 1.0; b = 1.0; }
+    if (x < 24) { if (y > n - 25) { r = 0.05; g = 0.05; b = 0.1; } }
+    t.pixel(x, y, r, g, b);
   }
 }
-scene.camera(40.0, 0.0, 0.0, 3.2, 0.0, 0.0, 0.0);
-scene.directional_light(0.0, 0.0, -1.0, 0.8);
+t.save_png("images/textured-quad-texture.png");
+let loaded = scene.texture_file("images/textured-quad-texture.png");
+let m = material().color(1.0, 1.0, 1.0).specular(0.0).texture(loaded);
+scene.plane(2.4, m);
+scene.camera(40.0, 0.0, 0.0, 3.6, 0.0, 0.0, 0.0);
+scene.directional_light(0.0, 0.0, -1.0, 0.85);
+scene.ambient(0.15);
 scene.render_png("images/textured-quad.png", 480, 480);
 end _dsl_
 savedsl(p, out);

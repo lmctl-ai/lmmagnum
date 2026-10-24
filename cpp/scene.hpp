@@ -3,17 +3,30 @@
 #include <Magnum/Math/Color.h>
 #include <Magnum/Math/Matrix4.h>
 #include <Magnum/Math/Vector3.h>
+#include <Magnum/Math/Vector2.h>
 #include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 
 namespace lmmagnum {
 using namespace Magnum::Math::Literals;
-using Magnum::Float; using Magnum::UnsignedInt; using Magnum::Matrix4; using Magnum::Vector3; using Magnum::Color3;
+using Magnum::Float; using Magnum::UnsignedInt; using Magnum::Matrix4; using Magnum::Vector2; using Magnum::Vector3; using Magnum::Color3;
 
 // Local-space triangle soup taken from a Magnum::Trade::MeshData primitive.
-struct Mesh { std::vector<Vector3> positions, normals; std::vector<UnsignedInt> indices; };
-struct Material { Color3 color{0.72f,0.74f,0.78f}; float roughness=.7f, specular=.2f, shininess=32.f; };
+// `uvs` is empty or parallel to `positions` (origin bottom-left, v up, as in Magnum).
+struct Mesh { std::vector<Vector3> positions, normals; std::vector<Vector2> uvs; std::vector<UnsignedInt> indices; };
+// 8-bit RGB image sampled by the rasterizer with a lazily built mip chain. Alpha in source files is dropped.
+struct Texture {
+  enum class Wrap { Repeat, Clamp, Mirror };
+  int width=0, height=0; std::vector<unsigned char> rgb;
+  bool linear=true; Wrap wrap=Wrap::Repeat; float scale_u=1.f, scale_v=1.f;
+  struct Level { int w=0, h=0; std::vector<float> rgb; };
+  mutable std::vector<Level> levels; mutable bool dirty=true;   // rebuilt by sample() after pixels change
+  Color3 sample(float u, float v, float lod) const;
+  static Texture checker(int size, int cell, Color3 a, Color3 b);
+};
+struct Material { Color3 color{0.72f,0.74f,0.78f}; float roughness=.7f, specular=.2f, shininess=32.f; const Texture* texture=nullptr; };   // texture multiplies color
 // Scene-graph node: a transform shared by every shape (and child group) that names it as parent.
 struct Group {
   Vector3 translation{}, rotation{}, scaling{1.f,1.f,1.f};
@@ -43,6 +56,9 @@ Mesh make_ring(float inner, float outer, unsigned segments);
 Mesh scaled(Mesh, Vector3 factor); // bakes a non-uniform scale into positions and normals
 std::size_t triangle_count(const Mesh&);
 
+// Decodes PNG/JPEG/BMP/TGA/GIF(first frame)/PSD/HDR/PNM bytes with stb_image. Throws on failure or when larger than 8192 per side.
+Texture load_texture(const std::string& path);
+void save_texture_png(const std::string& path, const Texture&);
 Image render(const std::vector<const Shape*>& shapes, const Camera&, const Light&, Color3 background, int width, int height, int supersample=2);
 void write_png(const std::string& path, const Image&);
 void write_ppm(const std::string& path, const Image&);

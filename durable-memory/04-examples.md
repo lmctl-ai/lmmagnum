@@ -7,7 +7,7 @@ The Magnum index (https://magnum.graphics/doc/magnum/example-index.html) is most
 | File | Magnum example | What is reproduced | What is dropped |
 |---|---|---|---|
 | `triangle.lms` | Your First Triangle | one flat triangle | per-vertex RGB colours |
-| `textured-quad.lms` | Textured Quad | quad of two triangles; checker tiles | image import, UVs, shaders |
+| `textured-quad.lms` | Textured Quad | one quad sampling a texture painted pixel by pixel, saved to PNG and reloaded with `texture_file` | shaders |
 | `primitives.lms` | Primitives | all solid primitives, OBJ export | mouse rotation |
 | `model-viewer.lms` | Model Viewer | posed multi-shape model, OBJ export | file importers, scene graph UI |
 | `area-lights.lms` | Area Lights | spheres and floor under soft light | real area lights (only directional + ambient) |
@@ -36,6 +36,9 @@ The Magnum index (https://magnum.graphics/doc/magnum/example-index.html) is most
 | `fluidsimulation3d.lms` | 3D Fluid Simulation | 32 ABC-flow streamlines as tube chains | the particle solver |
 | `fluidsimulation2d.lms` | 2D Fluid Simulation | opposite vortex pair, 40 streamlines | the interactive solver |
 | `level-1-sessions.lms` ... `level-4-automation.lms` | lmctl.com homepage clips (lmctl-ai/lmctl `scripts/homepage/video`) | the four 10 s storyboards (240 frames) ported from the lmcad scripts; ffmpeg writes MP4 + GIF | lmdraw title/label overlays |
-| `textured-triangle.lms` | Textured Triangle | checker of 64 sub-triangles | image import and sampling |
+| `textured-triangle.lms` | Textured Triangle | one triangle with UVs sampling a value-noise "stone" texture | shaders |
+| `texture-modes.lms` | (lmmagnum) | linear vs nearest, trilinear mips at a grazing angle, repeat/clamp/mirror | |
+| `textured-planet.lms` | (lmmagnum) | UV sphere with a generated seamless Earth map and a cratered moon; 36-frame GIF | |
+| `textured-primitives.lms` | (lmmagnum) | one brick texture on every primitive that has UVs, with shadows | |
 
 Not reproduced: Audio, DART and Box2D (engine-backed physics; `bullet.lms` is closed-form ballistics only), ImGui, Mouse Interaction, Object Picking, the Vulkan and WebXR examples, and the plain-GLFW, sokol and Vulkan triangles (the same picture as `triangle.lms`). They need a GL/Vulkan device, windowing, input, audio or an engine the one-static-binary goal excludes.

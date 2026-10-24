@@ -16,7 +16,7 @@ Every picture is produced by a self-contained `.lms` program in [`examples/`](ex
 | Your First Triangle | Textured Quad | Primitives |
 | --- | --- | --- |
 | <img src="docs/images/triangle.png" width="290"> | <img src="docs/images/textured-quad.png" width="290"> | <img src="docs/images/primitives.png" width="290"> |
-| Magnum example: one flat triangle<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/triangle.lms` | Magnum example: checker quad from two triangles<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-quad.lms` | Magnum example: every solid primitive, OBJ export<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/primitives.lms` |
+| Magnum example: one flat triangle<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/triangle.lms` | Magnum example: a quad sampling a PNG-backed texture (painted in the script, saved, reloaded)<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-quad.lms` | Magnum example: every solid primitive, OBJ export<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/primitives.lms` |
 
 | Primitives, using a scene graph | Text | Model Viewer |
 | --- | --- | --- |
@@ -58,10 +58,19 @@ Every picture is produced by a self-contained `.lms` program in [`examples/`](ex
 | <img src="docs/images/cubemap.png" width="290"> | <img src="docs/images/bullet.png" width="290"> | <img src="docs/images/fluidsimulation3d.png" width="290"> |
 | Six-face room around glossy spheres<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/cubemap.lms` | 64 boxes falling and bouncing, closed-form ballistics<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/bullet.lms` | 32 ABC-flow streamlines coloured by speed<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/fluidsimulation3d.lms` |
 
-| 2D fluid flow | Textured triangle |   |
+| 2D fluid flow | Textured triangle | Texture filtering and wrapping |
 | --- | --- | --- |
-| <img src="docs/images/fluidsimulation2d.png" width="290"> | <img src="docs/images/textured-triangle.png" width="290"> |   |
-| A counter-rotating vortex pair, 40 streamlines<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/fluidsimulation2d.lms` | A checker of 64 sub-triangles<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-triangle.lms` |   |
+| <img src="docs/images/fluidsimulation2d.png" width="290"> | <img src="docs/images/textured-triangle.png" width="290"> | <img src="docs/images/texture-modes.png" width="290"> |
+| A counter-rotating vortex pair, 40 streamlines<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/fluidsimulation2d.lms` | A triangle with UVs sampling a noise-made stone texture<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-triangle.lms` | Linear vs nearest, mip filtering at a grazing angle, repeat, clamp and mirror wrapping<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/texture-modes.lms` |
+
+### Textures
+
+`Scene.texture` / `Scene.texture_checker` create images in the script (`Texture.pixel` paints one pixel; `Texture.save_png` writes it) and `Scene.texture_file` loads a PNG, JPEG, BMP or TGA. A material's texture multiplies its colour (use white for the image as is) and is sampled with trilinear mip filtering, nearest filtering on request, and repeat, clamp or mirror wrapping. Cubes, spheres, cylinders, cones, capsules, planes, text, rings, tubes and triangles carry UVs.
+
+| Textured planet | Textured primitives | Textured quad |
+| --- | --- | --- |
+| <img src="docs/images/textured-planet.gif" width="290"> | <img src="docs/images/textured-primitives.png" width="290"> | <img src="docs/images/textured-quad.png" width="290"> |
+| A UV sphere wrapped in a generated Earth map, plus a cratered moon (36-frame turn, GIF via ffmpeg)<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-planet.lms` | One brick texture on a cube, sphere, cylinder, cone, capsule, tube and ring<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-primitives.lms` | The texture is painted pixel by pixel, saved to PNG and loaded back<br>`lmctl autorun https://raw.githubusercontent.com/lmctl-ai/lmmagnum/main/examples/textured-quad.lms` |
 
 ### Homepage clips from lmctl.com
 
