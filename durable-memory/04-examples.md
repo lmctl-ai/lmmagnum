@@ -22,5 +22,12 @@ The Magnum index (https://magnum.graphics/doc/magnum/example-index.html) is most
 | `depthtesting.lms` | lmfilament `depthtesting` | two overlapping triangles, nearer wins | per-vertex colors |
 | `material-sandbox.lms` | lmfilament `material_sandbox` | 3x3 grid of color x gloss | refraction, cloth, subsurface |
 | `lightbulb.lms` | lmfilament `lightbulb` | glossy sphere, floor, glowing bulb under one key light | point/spot lights, shadows |
+| `caffeine-molecule.lms` | lmblender `caffeine-molecule` | 24 atoms, 29 stick segments, CPK colours | path tracing |
+| `ball-stick.lms` | lmcad `ball-stick` | water, 104.5 degree angle | B-rep |
+| `buckyball.lms` | lmcad `buckyball` | C60 from icosahedral symmetry, 90 bonds | assert checks |
+| `dna-double-helix.lms` | lmblender `dna-double-helix` | 28 base pairs, backbones as tube chains | strand mesh |
+| `cornell-box.lms` | lmblender `cornell-box` | room, two blocks, lamp | global illumination (colour bleeding) |
+| `saturn-rings.lms` | lmblender `saturn-rings` | oblate planet + four `Scene.ring` bands | ring shadow |
+| `truss-bridge.lms` | lmcad `truss-bridge` | Pratt truss, member colour/radius from the closed-form forces | lmplot elevation |
 
 Not reproduced: Audio, Bullet/DART/Box2D physics, 2D/3D fluid simulation, ImGui, Mouse Interaction, Object Picking, Text rendering, Cube Map, Shadow map, Multi Draw, Vulkan and WebXR examples, plain-GLFW and sokol triangles. They require a GL/Vulkan device, windowing, input, audio, fonts, or third-party libraries that the one-static-binary goal excludes.

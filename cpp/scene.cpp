@@ -1,5 +1,9 @@
 #include "scene.hpp"
 #include <Magnum/Math/Functions.h>
+#include <Magnum/Math/Quaternion.h>
+#include <Magnum/Math/Matrix3.h>
+#include <cmath>
+#include <stdexcept>
 #include <Magnum/Primitives/Capsule.h>
 #include <Magnum/Primitives/Cone.h>
 #include <Magnum/Primitives/Cube.h>
@@ -113,6 +117,29 @@ Mesh make_plane() { return convert(Magnum::Primitives::planeSolid()); }
 Mesh scaled(Mesh m, Vector3 f) {
   for(auto& v:m.positions) v*=f;
   for(auto& n:m.normals) n=(n/f).normalized();
+  return m;
+}
+Mesh make_tube(Vector3 p0,Vector3 p1,float radius) {
+  Vector3 d=p1-p0; float len=d.length();
+  if(len==0.f) throw std::runtime_error("tube endpoints must differ");
+  Mesh m=scaled(make_cylinder(),{radius,len/2,radius});   // unit cylinder spans y in [-1, 1]
+  Vector3 dir=d/len;
+  Matrix4 rot=dir.y()<-0.9999f?Matrix4::rotationX(Magnum::Deg(180.f)):Matrix4::from(Magnum::Quaternion::rotation(Vector3::yAxis(),dir).toMatrix(),Vector3{});
+  Matrix4 xf=Matrix4::translation((p0+p1)*0.5f)*rot; Magnum::Matrix3 nm=xf.normalMatrix();
+  for(auto& v:m.positions) v=xf.transformPoint(v);
+  for(auto& n:m.normals) n=(nm*n).normalized();
+  return m;
+}
+Mesh make_ring(float inner,float outer,unsigned segments) {
+  if(segments<3) throw std::runtime_error("ring needs at least 3 segments");
+  Mesh m; const float two_pi=6.28318530718f;
+  for(int side=0;side<2;side++) {
+    UnsignedInt base=UnsignedInt(m.positions.size()); Vector3 n{0.f,side?-1.f:1.f,0.f};
+    for(unsigned k=0;k<=segments;k++) { float a=two_pi*float(k)/float(segments),c=std::cos(a),s=std::sin(a);
+      m.positions.push_back({inner*c,0.f,inner*s}); m.positions.push_back({outer*c,0.f,outer*s}); m.normals.push_back(n); m.normals.push_back(n); }
+    for(unsigned k=0;k<segments;k++) { UnsignedInt i=base+2*k;
+      if(side==0) m.indices.insert(m.indices.end(),{i,i+1,i+2,i+2,i+1,i+3}); else m.indices.insert(m.indices.end(),{i,i+2,i+1,i+2,i+3,i+1}); }
+  }
   return m;
 }
 std::size_t triangle_count(const Mesh& m) { return m.indices.size()/3; }

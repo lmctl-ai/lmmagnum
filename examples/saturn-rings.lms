@@ -1,0 +1,26 @@
+# Saturn and its main rings to scale, in units of the equatorial radius (60,268 km). The planet is oblate (polar/equatorial = 0.902).
+# Ring edges: C ring 1.239-1.527, B ring 1.527-1.951, Cassini Division 1.951-2.027, A ring 2.027-2.269 with the Encke gap at 2.214.
+# We look from 16 degrees above the ring plane; the Sun is 17 degrees above it on the left. Ported from lmblender examples/saturn-rings.lms
+# (no planet shadow on the rings here: the renderer casts no shadows).
+out = ARGV.len() > 0 ? ARGV[0] : "build/saturn-rings.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+let planet = material().color(0.82, 0.68, 0.46).roughness(0.8).specular(0.1);
+scene.background(0.0, 0.0, 0.0);
+scene.sphere(1.0, planet).scale(1.0, 0.902, 1.0);
+scene.ring(1.239, 1.527, material().color(0.28, 0.26, 0.224).specular(0.0));
+scene.ring(1.527, 1.951, material().color(0.85, 0.79, 0.68).specular(0.0));
+scene.ring(2.027, 2.202, material().color(0.62, 0.577, 0.496).specular(0.0));
+scene.ring(2.226, 2.269, material().color(0.62, 0.577, 0.496).specular(0.0));
+scene.ambient(0.12);
+scene.camera(28.0, -1.6, 2.6, 9.0, 0.0, -0.1, 0.0);
+scene.directional_light(0.86, -0.29, -0.42, 1.0);
+scene.render_png("images/saturn-rings.png", 900, 560);
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/saturn-rings.png");

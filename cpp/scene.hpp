@@ -36,6 +36,10 @@ Mesh make_cylinder(); Mesh make_cone(); Mesh make_capsule(); Mesh make_plane();
 // Voxel text from a built-in 5x7 font (A-Z, 0-9 and . , ! ? - : ' / + = ( ) _; lowercase is upper-cased).
 // Origin at the lower-left of the first glyph, lying in the XY plane, `height` units tall, extruded by one pixel.
 Mesh make_text(const std::string& text, float height);
+// Cylinder of `radius` from p0 to p1 (capped), baked in world space. Throws when p0 == p1.
+Mesh make_tube(Vector3 p0, Vector3 p1, float radius);
+// Flat double-sided annulus in the XZ plane (y = 0) between two radii.
+Mesh make_ring(float inner, float outer, unsigned segments);
 Mesh scaled(Mesh, Vector3 factor); // bakes a non-uniform scale into positions and normals
 std::size_t triangle_count(const Mesh&);
 

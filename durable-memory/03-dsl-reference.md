@@ -14,6 +14,8 @@ Generated from `schema/lmmagnum.dsl.json`; context variable `scene: Scene`.
 | `Scene.plane(float, Material)` | `Shape` |
 | `Scene.text(string, float, Material)` | `Shape` |
 | `Scene.group()` | `Group` |
+| `Scene.tube_between(float, float, float, float, float, float, float, Material)` | `Shape` |
+| `Scene.ring(float, float, Material)` | `Shape` |
 | `Scene.camera(float, float, float, float, float, float, float)` | `Camera` |
 | `Scene.directional_light(float, float, float, float)` | `Light` |
 | `Scene.background(float, float, float)` | `Scene` |
@@ -59,5 +61,6 @@ Generated from `schema/lmmagnum.dsl.json`; context variable `scene: Scene`.
 - `accumulate(w,h)` renders and adds a frame into a float accumulator; `save_accumulated_png` writes the mean (motion blur). Call `reset_accumulation()` to start over or change size.
 - Scene graph: a `Group` is a shared transform (translate/rotate/scale, same Euler order as shapes). `Shape.parent(g)` / `Group.parent(g)` attach to it; the world matrix is the product of the whole chain, used by rendering and every exporter. A parent that would form a cycle is an error.
 - `Scene.text(s, h, m)` builds voxel text from a built-in 5x7 font (A-Z, 0-9 and `. , ! ? - : ' / + = ( ) _`; lowercase is upper-cased, unknown characters become `?`), `h` units tall, one pixel deep, lower-left of the first glyph at the shape origin, 1 to 256 characters.
+- `tube_between(x1,y1,z1,x2,y2,z2,r,m)` is a capped cylinder between two points, baked in world space (its own `translate`/`rotate` still apply on top); `ring(inner,outer,m)` is a flat double-sided annulus in the XZ plane.
 - Limits: 4096 shapes and 4096 materials per run. Host errors surface as the standard one-line JSON, exit 3.
 - Inside `_dsl_` there is no `assert`, ternary, arrays, or `println`; use `if/else`, `for (i in range(a,b))`, `str()`, string `+`, `float()`, `sin/cos` etc. Outside the block (plain lmscript) `assert`, `system`, `println` exist.

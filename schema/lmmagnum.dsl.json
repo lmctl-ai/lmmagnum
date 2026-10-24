@@ -236,6 +236,31 @@
             "params": [],
             "returns": "Group"
           }
+        ],
+        "tube_between": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "ring": [
+          {
+            "params": [
+              "float",
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
         ]
       }
     },

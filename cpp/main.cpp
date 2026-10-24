@@ -56,6 +56,12 @@ void register_host(dslvm::Registry& r,Host& h) {
   checked_method(r,"Scene","cylinder",{"float","float","Material"},"Shape",[&h](void*,Args& a){ positive(a[0].f,"cylinder radius"); positive(a[1].f,"cylinder height"); return make(h,scaled(make_cylinder(),{float(a[0].f),float(a[1].f)/2,float(a[0].f)}),mat(a,2),"cylinder"); });
   checked_method(r,"Scene","cone",{"float","float","Material"},"Shape",[&h](void*,Args& a){ positive(a[0].f,"cone radius"); positive(a[1].f,"cone height"); return make(h,scaled(make_cone(),{float(a[0].f),float(a[1].f)/2,float(a[0].f)}),mat(a,2),"cone"); });
   checked_method(r,"Scene","capsule",{"float","float","Material"},"Shape",[&h](void*,Args& a){ positive(a[0].f,"capsule radius"); positive(a[1].f,"capsule length"); float rad=float(a[0].f); return make(h,scaled(make_capsule(),{rad,rad,rad}),mat(a,2),"capsule"); });
+  checked_method(r,"Scene","tube_between",{"float","float","float","float","float","float","float","Material"},"Shape",[&h](void*,Args& a){
+    for(int i=0;i<7;i++) finite(a[i].f,"tube_between argument"); positive(a[6].f,"tube radius");
+    return make(h,make_tube(vec(a,0),vec(a,3),float(a[6].f)),mat(a,7),"tube"); });
+  checked_method(r,"Scene","ring",{"float","float","Material"},"Shape",[&h](void*,Args& a){
+    positive(a[0].f,"ring inner radius"); positive(a[1].f,"ring outer radius"); if(a[1].f<=a[0].f) throw dslvm::Error("ring outer radius must exceed inner radius");
+    return make(h,make_ring(float(a[0].f),float(a[1].f),96),mat(a,2),"ring"); });
   checked_method(r,"Scene","plane",{"float","Material"},"Shape",[&h](void*,Args& a){ positive(a[0].f,"plane size"); float s=float(a[0].f)/2; return make(h,scaled(make_plane(),{s,s,1.f}),mat(a,1),"plane"); });
   checked_method(r,"Scene","text",{"string","float","Material"},"Shape",[&h](void*,Args& a){
     positive(a[1].f,"text height"); if(a[0].s.empty()||a[0].s.size()>256) throw dslvm::Error("text must be 1 to 256 characters");
