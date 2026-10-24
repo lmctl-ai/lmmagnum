@@ -13,7 +13,7 @@ Corrade (https://github.com/mosra/corrade) - MIT, Copyright Vladimir Vondrus and
   Their license texts: `third_party/magnum/COPYING`, `third_party/corrade/COPYING`
   (staged next to release binaries by `scripts/stage-release-notices.sh`).
 
-cpp-dsl-sdk (https://github.com/lmctl-ai/cpp-dsl-sdk) - MIT. `cpp/dslvm.hpp` is vendored, pinned by `sdk.lock`.
+lmcode-cpp (https://github.com/lmctl-ai/lmcode-cpp) - MIT. `cpp/dslvm.hpp` is vendored, pinned by `sdk.lock`.
 
 `cpp/deflate.hpp` and `cpp/atomic-file.*` originate from lmcad (MIT).
 

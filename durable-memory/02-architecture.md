@@ -5,7 +5,7 @@
 | Path | Role |
 |---|---|
 | `schema/lmmagnum.dsl.json` | the DSL surface (types, methods, functions, context `scene`); embedded into the binary at configure time (`build/generated/schema_embedded.hpp`) |
-| `cpp/dslvm.hpp` | vendored cpp-dsl-sdk VM, pinned by `sdk.lock`; never edit, refresh with `scripts/sync-sdk.sh` |
+| `cpp/dslvm.hpp` | vendored lmcode-cpp VM, pinned by `sdk.lock`; never edit, refresh with `scripts/sync-sdk.sh` |
 | `cpp/main.cpp` | `Host` state (shapes, materials, camera, light, accumulator), `register_host()` binding every schema member, CLI (`--version`, `--dsl-schema [--json]`, `--dsl-signatures`, `--dsl FILE...`) |
 | `cpp/scene.{hpp,cpp}` | `Mesh/Material/Shape/Group/Camera/Light/Image` structs (`Group` = scene-graph transform, `Shape.parent`); conversion of `Trade::MeshData` primitives into plain triangle lists; `make_tube`, `make_ring`, `make_text` (5x7 voxel font) |
 | `cpp/render.cpp` | software rasterizer, PNG/PPM writers, STL/OBJ/PLY exporters |

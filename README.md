@@ -103,4 +103,4 @@ cmake -S . -B build -G Ninja && cmake --build build
 
 ## License
 
-MIT, see [LICENSE](LICENSE). Magnum, Corrade and cpp-dsl-sdk are MIT as well; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+MIT, see [LICENSE](LICENSE). Magnum, Corrade and lmcode-cpp are MIT as well; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

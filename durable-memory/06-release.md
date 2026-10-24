@@ -8,7 +8,7 @@ Static linking: Linux `-static`; macOS cannot link libSystem statically so only 
 
 Status: all five platforms build and pass test.sh in CI (first green run on main, 2026-10-23).
 
-License: MIT (Magnum, Corrade, cpp-dsl-sdk and lmcad are MIT, so the combined binary is MIT-compatible with no copyleft obligations beyond the glibc/GCC runtime notes in THIRD_PARTY_NOTICES.md).
+License: MIT (Magnum, Corrade, lmcode-cpp and lmcad are MIT, so the combined binary is MIT-compatible with no copyleft obligations beyond the glibc/GCC runtime notes in THIRD_PARTY_NOTICES.md).
 
 ## Automatic releases
 
