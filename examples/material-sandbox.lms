@@ -1,0 +1,35 @@
+# Material sandbox
+# Ported from the lmfilament example material_sandbox (nine Filament sandbox materials on spheres): a 3x3 grid, rows are three base colors, columns go from matte to glossy.
+out = ARGV.len() > 0 ? ARGV[0] : "build/material-sandbox.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.08, 0.09, 0.12);
+let r1 = material().color(0.85, 0.25, 0.2).roughness(0.9).specular(0.05).shininess(8.0);
+let r2 = material().color(0.85, 0.25, 0.2).roughness(0.5).specular(0.4).shininess(32.0);
+let r3 = material().color(0.85, 0.25, 0.2).roughness(0.1).specular(0.9).shininess(96.0);
+let g1 = material().color(0.25, 0.75, 0.3).roughness(0.9).specular(0.05).shininess(8.0);
+let g2 = material().color(0.25, 0.75, 0.3).roughness(0.5).specular(0.4).shininess(32.0);
+let g3 = material().color(0.25, 0.75, 0.3).roughness(0.1).specular(0.9).shininess(96.0);
+let b1 = material().color(0.25, 0.4, 0.9).roughness(0.9).specular(0.05).shininess(8.0);
+let b2 = material().color(0.25, 0.4, 0.9).roughness(0.5).specular(0.4).shininess(32.0);
+let b3 = material().color(0.25, 0.4, 0.9).roughness(0.1).specular(0.9).shininess(96.0);
+scene.sphere(0.8, r1).translate(-2.0, 2.0, 0.0);
+scene.sphere(0.8, r2).translate(0.0, 2.0, 0.0);
+scene.sphere(0.8, r3).translate(2.0, 2.0, 0.0);
+scene.sphere(0.8, g1).translate(-2.0, 0.0, 0.0);
+scene.sphere(0.8, g2).translate(0.0, 0.0, 0.0);
+scene.sphere(0.8, g3).translate(2.0, 0.0, 0.0);
+scene.sphere(0.8, b1).translate(-2.0, -2.0, 0.0);
+scene.sphere(0.8, b2).translate(0.0, -2.0, 0.0);
+scene.sphere(0.8, b3).translate(2.0, -2.0, 0.0);
+scene.camera(35.0, 0.0, 0.0, 14.0, 0.0, 0.0, 0.0);
+scene.directional_light(-0.5, -0.7, -0.7, 1.0);
+scene.render_png("images/material-sandbox.png", 640, 640);
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/material-sandbox.png");

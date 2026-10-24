@@ -1,0 +1,22 @@
+# Depth testing
+# Ported from the lmfilament example depthtesting (Filament's depth-test sample): two overlapping triangles at different depths; the nearer one wins regardless of submission order.
+out = ARGV.len() > 0 ? ARGV[0] : "build/depthtesting.dslb";
+mkdir("images");
+mkdir("build");
+p = _dsl_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.1, 0.125, 0.25);
+let red = material().color(0.9, 0.2, 0.2).specular(0.0);
+let blue = material().color(0.2, 0.35, 0.95).specular(0.0);
+scene.ambient(0.9);
+scene.triangle(-1.0, -1.0, 0.5, 1.0, -1.0, 0.5, 0.0, 1.2, 0.5, red);
+scene.triangle(-0.3, -1.1, -0.5, 1.7, -1.1, -0.5, 0.7, 1.1, -0.5, blue);
+scene.camera(45.0, 0.0, 0.0, 6.0, 0.0, 0.0, 0.0);
+scene.directional_light(0.0, 0.0, -1.0, 0.2);
+scene.render_png("images/depthtesting.png", 640, 480);
+end _dsl_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/depthtesting.png");

@@ -23,6 +23,7 @@ struct LightHandle { Light* light; };
 struct Host {
   std::vector<std::unique_ptr<Shape>> shapes;
   std::vector<std::unique_ptr<Material>> materials;
+  std::vector<std::unique_ptr<Group>> groups;
   Camera camera; Light light; LightHandle light_handle{&light};
   Color3 background{.08f,.09f,.12f};
   std::vector<double> accum; int accum_w=0, accum_h=0, accum_n=0;
@@ -56,6 +57,10 @@ void register_host(dslvm::Registry& r,Host& h) {
   checked_method(r,"Scene","cone",{"float","float","Material"},"Shape",[&h](void*,Args& a){ positive(a[0].f,"cone radius"); positive(a[1].f,"cone height"); return make(h,scaled(make_cone(),{float(a[0].f),float(a[1].f)/2,float(a[0].f)}),mat(a,2),"cone"); });
   checked_method(r,"Scene","capsule",{"float","float","Material"},"Shape",[&h](void*,Args& a){ positive(a[0].f,"capsule radius"); positive(a[1].f,"capsule length"); float rad=float(a[0].f); return make(h,scaled(make_capsule(),{rad,rad,rad}),mat(a,2),"capsule"); });
   checked_method(r,"Scene","plane",{"float","Material"},"Shape",[&h](void*,Args& a){ positive(a[0].f,"plane size"); float s=float(a[0].f)/2; return make(h,scaled(make_plane(),{s,s,1.f}),mat(a,1),"plane"); });
+  checked_method(r,"Scene","text",{"string","float","Material"},"Shape",[&h](void*,Args& a){
+    positive(a[1].f,"text height"); if(a[0].s.empty()||a[0].s.size()>256) throw dslvm::Error("text must be 1 to 256 characters");
+    return make(h,make_text(a[0].s,float(a[1].f)),mat(a,2),"text"); });
+  checked_method(r,"Scene","group",{},"Group",[&h](void*,Args&){ return h.hold(h.groups,"Group",Group{}); });
   checked_method(r,"Scene","camera",{"float","float","float","float","float","float","float"},"Camera",[&h](void*,Args& a){
     for(auto& x:a) finite(x.f,"camera argument"); if(a[0].f<=0||a[0].f>=179) throw dslvm::Error("camera field of view must be between 0 and 179 degrees");
     Vector3 eye=vec(a,1), target=vec(a,4); Vector3 f=target-eye;
@@ -102,6 +107,14 @@ void register_host(dslvm::Registry& r,Host& h) {
   checked_method(r,"Shape","name",{"string"},"Shape",[S](void* p,Args& a){ S(p)->name=a[0].s; return Value::object("Shape",p); });
   checked_method(r,"Shape","color",{"float","float","float"},"Shape",[S](void* p,Args& a){ for(int i=0;i<3;i++){ finite(a[i].f,"color"); if(a[i].f<0||a[i].f>1) throw dslvm::Error("color must be between 0 and 1"); } S(p)->material.color=Color3(vec(a,0)); return Value::object("Shape",p); });
   checked_method(r,"Shape","triangle_count",{},"int",[S](void* p,Args&){ return Value::integer(int64_t(triangle_count(S(p)->mesh))); });
+  auto G=[](void* p){ return static_cast<Group*>(p); };
+  checked_method(r,"Group","translate",{"float","float","float"},"Group",[G](void* p,Args& a){ for(int i=0;i<3;i++) finite(a[i].f,"translate"); G(p)->translation=vec(a,0); return Value::object("Group",p); });
+  checked_method(r,"Group","rotate",{"float","float","float"},"Group",[G](void* p,Args& a){ for(int i=0;i<3;i++) finite(a[i].f,"rotate"); G(p)->rotation=vec(a,0); return Value::object("Group",p); });
+  checked_method(r,"Group","scale",{"float","float","float"},"Group",[G](void* p,Args& a){ for(int i=0;i<3;i++) positive(a[i].f,"scale"); G(p)->scaling=vec(a,0); return Value::object("Group",p); });
+  checked_method(r,"Group","parent",{"Group"},"Group",[G](void* p,Args& a){
+    auto* np=static_cast<Group*>(a[0].obj); for(const Group* g=np;g;g=g->parent) if(g==G(p)) throw dslvm::Error("group parent would create a cycle");
+    G(p)->parent=np; return Value::object("Group",p); });
+  checked_method(r,"Shape","parent",{"Group"},"Shape",[S](void* p,Args& a){ S(p)->parent=static_cast<Group*>(a[0].obj); return Value::object("Shape",p); });
   auto M=[](void* p){ return static_cast<Material*>(p); };
   checked_method(r,"Material","color",{"float","float","float"},"Material",[M](void* p,Args& a){ for(int i=0;i<3;i++){ finite(a[i].f,"color"); if(a[i].f<0||a[i].f>1) throw dslvm::Error("color must be between 0 and 1"); } M(p)->color=Color3(vec(a,0)); return Value::object("Material",p); });
   checked_method(r,"Material","roughness",{"float"},"Material",[M](void* p,Args& a){ finite(a[0].f,"roughness"); M(p)->roughness=float(a[0].f); return Value::object("Material",p); });

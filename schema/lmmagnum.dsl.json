@@ -220,6 +220,22 @@
             "params": [],
             "returns": "void"
           }
+        ],
+        "text": [
+          {
+            "params": [
+              "string",
+              "float",
+              "Material"
+            ],
+            "returns": "Shape"
+          }
+        ],
+        "group": [
+          {
+            "params": [],
+            "returns": "Group"
+          }
         ]
       }
     },
@@ -285,6 +301,14 @@
           {
             "params": [],
             "returns": "int"
+          }
+        ],
+        "parent": [
+          {
+            "params": [
+              "Group"
+            ],
+            "returns": "Shape"
           }
         ]
       }
@@ -352,6 +376,48 @@
               "float"
             ],
             "returns": "Light"
+          }
+        ]
+      }
+    },
+    "Group": {
+      "methods": {
+        "translate": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Group"
+          }
+        ],
+        "rotate": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Group"
+          }
+        ],
+        "scale": [
+          {
+            "params": [
+              "float",
+              "float",
+              "float"
+            ],
+            "returns": "Group"
+          }
+        ],
+        "parent": [
+          {
+            "params": [
+              "Group"
+            ],
+            "returns": "Group"
           }
         ]
       }
