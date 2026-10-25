@@ -1,0 +1,28 @@
+# Primitives, using a scene graph
+# Magnum Python example "Primitives, using a scene graph" (https://doc.magnum.graphics/python/examples/#primitives-using-a-scene-graph), reproduced headless: the same solids as primitives.lms, but every shape is parented to a Group, and the capsule hangs off a second, nested group; one rotation of the root moves the whole tree.
+out = ARGV.len() > 0 ? ARGV[0] : "build/primitives-scene-graph.dslb";
+mkdir("images");
+mkdir("build");
+p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.08, 0.09, 0.12);
+let c = material().color(0.85, 0.45, 0.2).specular(0.4);
+let d = material().color(0.3, 0.65, 0.85).specular(0.4);
+let root = scene.group().rotate(12.0, -18.0, 0.0);
+let arm = scene.group().translate(0.0, -1.0, 0.0).rotate(0.0, 0.0, 25.0).parent(root);
+scene.cube(1.0, c).translate(-3.0, 0.0, 0.0).rotate(20.0, 30.0, 0.0).parent(root);
+scene.sphere(0.6, c).translate(-1.5, 0.0, 0.0).parent(root);
+scene.icosphere(0.6, 2, c).translate(0.0, 0.0, 0.0).parent(root);
+scene.cylinder(0.5, 1.2, c).translate(1.5, 0.0, 0.0).parent(root);
+scene.cone(0.5, 1.2, c).translate(3.0, 0.0, 0.0).parent(root);
+scene.capsule(0.4, 1.0, d).translate(0.0, 0.0, 0.0).parent(arm);
+scene.capsule(0.3, 0.8, d).translate(0.0, -1.2, 0.0).parent(arm);
+scene.camera(42.0, 0.0, 1.0, 11.0, 0.0, -1.0, 0.0);
+scene.directional_light(-0.5, -1.0, -0.4, 0.9);
+scene.render_png("images/primitives-scene-graph.png", 800, 500);
+end _lmcode_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/primitives-scene-graph.png");

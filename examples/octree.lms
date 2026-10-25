@@ -1,0 +1,30 @@
+# Octree
+# Magnum example "Octree" (https://magnum.graphics/doc/magnum/examples-octree.html), reproduced headless: a loose octree of boxes: subdivision cells drawn as thin cubes, occupied cells coloured; 64 cells.
+out = ARGV.len() > 0 ? ARGV[0] : "build/octree.dslb";
+mkdir("images");
+mkdir("build");
+p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.06, 0.07, 0.1);
+let cell = material().color(0.3, 0.5, 0.8).specular(0.0);
+let hit = material().color(0.9, 0.5, 0.15).specular(0.2);
+for (i in range(0, 4)) {
+  for (j in range(0, 4)) {
+    for (k in range(0, 4)) {
+      if ((i + j + k) % 5 == 0) {
+        scene.cube(0.55, hit).translate(float(i) - 1.5, float(j) - 1.5, float(k) - 1.5);
+      } else {
+        scene.cube(0.55, cell).translate(float(i) - 1.5, float(j) - 1.5, float(k) - 1.5);
+      }
+    }
+  }
+}
+scene.camera(40.0, 7.0, 5.0, 9.0, 0.0, 0.0, 0.0);
+scene.directional_light(-0.5, -1.0, -0.4, 0.9);
+scene.render_png("images/octree.png", 640, 640);
+end _lmcode_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/octree.png");

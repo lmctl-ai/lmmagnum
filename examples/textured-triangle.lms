@@ -1,0 +1,43 @@
+# Textured Triangle
+# Magnum example "Textured Triangle" (https://magnum.graphics/doc/magnum/examples-textured-triangle.html): one triangle whose corners carry texture coordinates (0,0), (1,0) and (0.5,1); the fragment colour is sampled from the image. Here the image is a procedural stone-like pattern built with a small value-noise function.
+out = ARGV.len() > 0 ? ARGV[0] : "build/textured-triangle.dslb";
+mkdir("images");
+mkdir("build");
+p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+fn hash(x: float, y: float) -> float {
+  let s = sin(x * 127.1 + y * 311.7) * 43758.5453;
+  return s - floor(s);
+}
+fn vnoise(x: float, y: float) -> float {
+  let ix = floor(x);
+  let iy = floor(y);
+  let fx = x - ix;
+  let fy = y - iy;
+  let sx = fx * fx * (3.0 - 2.0 * fx);
+  let sy = fy * fy * (3.0 - 2.0 * fy);
+  return lerp(lerp(hash(ix, iy), hash(ix + 1.0, iy), sx), lerp(hash(ix, iy + 1.0), hash(ix + 1.0, iy + 1.0), sx), sy);
+}
+scene.background(0.08, 0.09, 0.12);
+let n = 128;
+let t = scene.texture(n, n);
+for (y in range(0, n)) {
+  for (x in range(0, n)) {
+    let u = float(x) / 16.0;
+    let v = float(y) / 16.0;
+    let h = vnoise(u, v) * 0.55 + vnoise(u * 2.0, v * 2.0) * 0.3 + vnoise(u * 4.0, v * 4.0) * 0.15;
+    t.pixel(x, y, 0.35 + 0.5 * h, 0.3 + 0.45 * h, 0.25 + 0.4 * h);
+  }
+}
+let m = material().color(1.0, 1.0, 1.0).specular(0.0).texture(t);
+scene.triangle(-2.0, -1.6, 0.0, 2.0, -1.6, 0.0, 0.0, 1.9, 0.0, m);
+scene.camera(40.0, 0.0, 0.0, 6.0, 0.0, 0.0, 0.0);
+scene.directional_light(0.0, 0.0, -1.0, 0.8);
+scene.ambient(0.2);
+scene.render_png("images/textured-triangle.png", 480, 480);
+end _lmcode_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/textured-triangle.png");

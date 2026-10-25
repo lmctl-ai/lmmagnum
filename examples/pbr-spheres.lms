@@ -1,0 +1,27 @@
+# PBR sphere sweep
+# Ported from the lmfilament example hellopbr (Filament's PBR sphere with roughness 0.4), reproduced with this host's roughness/specular parameters: five spheres sweep roughness from 0.05 to 0.95.
+out = ARGV.len() > 0 ? ARGV[0] : "build/pbr-spheres.dslb";
+mkdir("images");
+mkdir("build");
+p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.08, 0.09, 0.12);
+let a = material().color(0.8, 0.8, 0.8).roughness(0.05).specular(0.9).shininess(96.0);
+let b = material().color(0.8, 0.8, 0.8).roughness(0.275).specular(0.7).shininess(64.0);
+let c = material().color(0.8, 0.8, 0.8).roughness(0.5).specular(0.5).shininess(32.0);
+let d = material().color(0.8, 0.8, 0.8).roughness(0.725).specular(0.3).shininess(16.0);
+let e = material().color(0.8, 0.8, 0.8).roughness(0.95).specular(0.1).shininess(8.0);
+scene.sphere(0.9, a).translate(-4.0, 0.0, 0.0);
+scene.sphere(0.9, b).translate(-2.0, 0.0, 0.0);
+scene.sphere(0.9, c).translate(0.0, 0.0, 0.0);
+scene.sphere(0.9, d).translate(2.0, 0.0, 0.0);
+scene.sphere(0.9, e).translate(4.0, 0.0, 0.0);
+scene.camera(30.0, 0.0, 1.0, 14.0, 0.0, 0.0, 0.0);
+scene.directional_light(-0.5, -0.8, -0.6, 1.0);
+scene.render_png("images/pbr-spheres.png", 800, 300);
+end _lmcode_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/pbr-spheres.png");

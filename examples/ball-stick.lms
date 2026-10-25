@@ -1,0 +1,25 @@
+# A water molecule with its real 104.5 degree H-O-H angle (bond lengths are stretched for legibility).
+# Ported from lmcad examples/ball-stick.lms.
+out = ARGV.len() > 0 ? ARGV[0] : "build/ball-stick.dslb";
+mkdir("images");
+mkdir("build");
+p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+let oxygen = material().color(0.88, 0.08, 0.06).roughness(0.38).specular(0.35);
+let hydrogen = material().color(0.86, 0.90, 0.96).roughness(0.42).specular(0.25);
+let bond = material().color(0.48, 0.52, 0.60).roughness(0.60);
+scene.background(0.035, 0.045, 0.07);
+scene.sphere(0.60, oxygen).translate(0.0, 0.0, 0.0);
+scene.sphere(0.32, hydrogen).translate(-1.24, 0.0, 0.96);
+scene.sphere(0.32, hydrogen).translate(1.24, 0.0, 0.96);
+scene.tube_between(0.0, 0.0, 0.0, -1.24, 0.0, 0.96, 0.12, bond);
+scene.tube_between(0.0, 0.0, 0.0, 1.24, 0.0, 0.96, 0.12, bond);
+scene.camera(45.0, 0.0, 6.0, 4.0, 0.0, 0.0, 0.4);
+scene.directional_light(-0.6, -1.0, -0.5, 0.9);
+scene.render_png("images/ball-stick.png", 640, 480);
+end _lmcode_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/ball-stick.png");

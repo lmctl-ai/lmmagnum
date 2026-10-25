@@ -1,0 +1,29 @@
+# Shadows
+# Magnum example "Shadows" (https://magnum.graphics/doc/magnum/examples-shadows.html), reproduced headless: a floor and four solids lit by one directional light with a shadow map (`scene.shadows(true)`: an orthographic depth pass along the light, 2048 x 2048, 3 x 3 PCF). The original uses cascaded shadow maps on the GPU.
+out = ARGV.len() > 0 ? ARGV[0] : "build/shadows.dslb";
+mkdir("images");
+mkdir("build");
+p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.55, 0.7, 0.9);
+let floor = material().color(0.75, 0.75, 0.72).specular(0.05);
+let a = material().color(0.85, 0.3, 0.25).specular(0.4);
+let b = material().color(0.25, 0.6, 0.85).specular(0.4);
+let c = material().color(0.9, 0.75, 0.25).specular(0.4);
+let d = material().color(0.4, 0.8, 0.45).specular(0.4);
+scene.plane(14.0, floor).rotate(-90.0, 0.0, 0.0).translate(0.0, -1.0, 0.0);
+scene.sphere(1.0, a).translate(-2.8, 0.0, 0.0);
+scene.cube(1.8, b).translate(-0.4, -0.1, 0.8).rotate(0.0, 25.0, 0.0);
+scene.cylinder(0.7, 2.6, c).translate(1.9, 0.3, -0.6);
+scene.cone(0.9, 2.2, d).translate(3.6, 0.1, 1.0);
+scene.ambient(0.22);
+scene.shadows(true);
+scene.camera(50.0, 0.0, 4.5, 9.5, 0.0, -0.3, 0.0);
+scene.directional_light(0.6, -0.55, -0.45, 0.95);
+scene.render_png("images/shadows.png", 900, 560);
+end _lmcode_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote images/shadows.png");

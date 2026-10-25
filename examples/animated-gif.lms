@@ -1,0 +1,37 @@
+# Animated GIF
+# Magnum example "Animated GIF" (https://magnum.graphics/doc/magnum/examples-animated-gif.html), reproduced headless: frames of a bouncing ball written as PNGs; ffmpeg (if installed) assembles images/animated-gif.gif.
+out = ARGV.len() > 0 ? ARGV[0] : "build/animated-gif.dslb";
+mkdir("images");
+mkdir("build");
+p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
+scene.background(0.9, 0.92, 0.95);
+let ball = material().color(0.9, 0.25, 0.2).specular(0.6);
+let ground = material().color(0.4, 0.45, 0.5).specular(0.0);
+scene.plane(8.0, ground).rotate(-90.0, 0.0, 0.0).translate(0.0, -1.0, 0.0);
+let b = scene.sphere(0.5, ball);
+scene.camera(35.0, 0.0, 1.5, 8.0, 0.0, 0.5, 0.0);
+scene.directional_light(-0.3, -1.0, -0.4, 0.9);
+for (f in range(0, 24)) {
+  let t = float(f) / 24.0;
+  let h = 4.0 * t * (1.0 - t) * 2.0;
+  b.translate(0.0, h - 0.5, 0.0);
+  let name = "build/bounce-" + str(f) + ".png";
+  if (f < 10) {
+    name = "build/bounce-0" + str(f) + ".png";
+  }
+  scene.render_png(name, 240, 240);
+}
+end _lmcode_
+savedsl(p, out);
+# run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
+r = system(concat(dsl_cli(p), ["--dsl", out]), 600000);
+if (r.code != 0) { println(r.stderr + r.stdout); }
+assert(r.code == 0);
+println("wrote build/bounce-*.png");
+if (which("ffmpeg") != null) {
+  g = system ffmpeg -y -loglevel error -framerate 24 -i build/bounce-%02d.png images/animated-gif.gif;
+  assert(g.code == 0);
+  println("wrote images/animated-gif.gif");
+} else {
+  println("ffmpeg not found: skipped images/animated-gif.gif (build/bounce-*.png are the frames)");
+}
