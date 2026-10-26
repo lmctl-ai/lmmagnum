@@ -9,7 +9,7 @@ npm install -g @lmctl-ai/lmctl
 lmscript examples/primitives.lms      # writes images/primitives.png
 ```
 
-Native binaries (`lmmagnum-linux-x64`, `-linux-arm64`, `-macos-arm64`, `-macos-x64`, `-windows-x64.exe`) are on the [releases page](https://github.com/lmctl-ai/lmmagnum/releases).
+The current release lane publishes native Linux binaries (`lmmagnum-linux-x64` and `lmmagnum-linux-arm64`) on the [releases page](https://github.com/lmctl-ai/lmmagnum/releases). Earlier releases may contain macOS and Windows assets; those platforms are not produced by the current lane.
 
 ## Examples
 
