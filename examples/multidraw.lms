@@ -1,5 +1,4 @@
 # Magnum example "Multi Draw" (https://magnum.graphics/doc/magnum/examples-multidraw.html), reproduced headless: 180 meshes of four kinds (box, sphere, cylinder, cone) in six rings, coloured by angle. The original issues them in one GPU multi-draw call; here each is its own shape.
-out = ARGV.len() > 0 ? ARGV[0] : "build/multidraw.dslb";
 mkdir("images");
 mkdir("build");
 p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
@@ -27,9 +26,8 @@ scene.camera(62.0, 0.0, 13.0, 16.0, 0.0, 0.0, 0.0);
 scene.directional_light(-0.4, -0.8, -0.5, 0.95);
 scene.render_png("images/multidraw.png", 900, 640);
 end _lmcode_
-savedsl(p, out);
 # run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
-r = system(concat(dsl_cli(p), ["--lmcode", out]), 600000);
-if (r.code != 0) { println(r.stderr + r.stdout); }
-assert(r.code == 0);
+r = run_lmcode(p);
+if (!r.ok) { println(r.stderr + r.stdout); }
+assert(r.ok);
 println("wrote images/multidraw.png");

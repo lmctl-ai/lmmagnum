@@ -1,6 +1,5 @@
 # Model Viewer
 # Magnum example "Model Viewer" (https://magnum.graphics/doc/magnum/examples-viewer.html), reproduced headless: a small scene graph of posed shapes (a toy robot) instead of an imported model; exported to OBJ so any viewer can open it.
-out = ARGV.len() > 0 ? ARGV[0] : "build/model-viewer.dslb";
 mkdir("images");
 mkdir("build");
 p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
@@ -22,9 +21,8 @@ scene.directional_light(-0.5, -1.0, -0.6, 0.9);
 scene.render_png("images/model-viewer.png", 640, 640);
 scene.export_obj("build/model-viewer.obj");
 end _lmcode_
-savedsl(p, out);
 # run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
-r = system(concat(dsl_cli(p), ["--lmcode", out]), 600000);
-if (r.code != 0) { println(r.stderr + r.stdout); }
-assert(r.code == 0);
+r = run_lmcode(p);
+if (!r.ok) { println(r.stderr + r.stdout); }
+assert(r.ok);
 println("wrote images/model-viewer.png");

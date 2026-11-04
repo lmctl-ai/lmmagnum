@@ -2,7 +2,7 @@
 
 > The public README, docs, images, and examples for `lmmagnum` are MIT under `LICENSE-examples`. Binary releases use `LICENSE`; implementation source and its history are maintained privately in `lmctlhq/lmmagnum`.
 
-**One static executable that drives [Magnum](https://magnum.graphics) from [lmscript](https://lmctl.com/tools/lmscript/skill.html) `_dsl_` blocks.** Build a scene from Magnum's primitives, render it with a built-in software rasterizer, and export PNG, PPM, STL, OBJ or PLY. No GPU, no window system, no shared libraries.
+**One static executable that drives [Magnum](https://magnum.graphics) from [lmscript](https://lmctl.com/tools/lmscript/skill.html) `_lmcode_` blocks.** Build a scene from Magnum's primitives, render it with a built-in software rasterizer, and export PNG, PPM, STL, OBJ or PLY. No GPU, no window system, no shared libraries.
 
 ```sh
 npm install -g @lmctl-ai/lmctl

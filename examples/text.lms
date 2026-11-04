@@ -1,6 +1,5 @@
 # Text
 # Magnum Python example "Text" (https://doc.magnum.graphics/python/examples/#text), reproduced headless: Magnum renders distance-field glyphs from a font; this host has no font stack, so the text is built from a 5x7 pixel font as extruded voxel boxes and lit like any other shape.
-out = ARGV.len() > 0 ? ARGV[0] : "build/text.dslb";
 mkdir("images");
 mkdir("build");
 p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
@@ -14,9 +13,8 @@ scene.directional_light(-0.4, -0.7, -0.6, 0.95);
 scene.export_obj("build/text.obj");
 scene.render_png("images/text.png", 800, 400);
 end _lmcode_
-savedsl(p, out);
 # run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
-r = system(concat(dsl_cli(p), ["--lmcode", out]), 600000);
-if (r.code != 0) { println(r.stderr + r.stdout); }
-assert(r.code == 0);
+r = run_lmcode(p);
+if (!r.ok) { println(r.stderr + r.stdout); }
+assert(r.ok);
 println("wrote images/text.png");

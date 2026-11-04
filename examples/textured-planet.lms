@@ -1,6 +1,5 @@
 # Textured planet
 # A UV sphere wrapped in an equirectangular Earth-like map, plus a cratered moon, turning through 36 frames (GIF via ffmpeg). Both textures are generated in the script with seamless fractal value noise (continents from a height threshold, polar ice by latitude) and sampled with trilinear filtering.
-out = ARGV.len() > 0 ? ARGV[0] : "build/textured-planet.dslb";
 mkdir("images");
 mkdir("build");
 p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
@@ -76,11 +75,10 @@ for (f in range(0, 36)) {
   scene.render_png(name, 360, 240);
 }
 end _lmcode_
-savedsl(p, out);
 # run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
-r = system(concat(dsl_cli(p), ["--lmcode", out]), 600000);
-if (r.code != 0) { println(r.stderr + r.stdout); }
-assert(r.code == 0);
+r = run_lmcode(p);
+if (!r.ok) { println(r.stderr + r.stdout); }
+assert(r.ok);
 println("wrote images/textured-planet.png");
 if (which("ffmpeg") != null) {
   g = system ffmpeg -y -loglevel error -framerate 20 -i build/textured-planet-%02d.png -vf "split[a][b];[a]palettegen[p];[b][p]paletteuse" images/textured-planet.gif;

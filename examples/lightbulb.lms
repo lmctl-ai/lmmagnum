@@ -1,6 +1,5 @@
 # Lightbulb
 # Ported from the lmfilament example lightbulb (Filament's sun plus point-light sample): this host has one directional light plus ambient, so the bulb is a bright glowing sphere above a glossy metal sphere on a floor.
-out = ARGV.len() > 0 ? ARGV[0] : "build/lightbulb.dslb";
 mkdir("images");
 mkdir("build");
 p = _lmcode_ cli="lmmagnum" install="github:lmctl-ai/lmmagnum@latest";
@@ -16,9 +15,8 @@ scene.camera(40.0, 0.0, 1.8, 7.5, 0.0, 0.2, 0.0);
 scene.directional_light(-0.6, -0.8, -0.3, 0.8);
 scene.render_png("images/lightbulb.png", 800, 500);
 end _lmcode_
-savedsl(p, out);
 # run the bytecode with the host it was compiled against (10 min limit; system() defaults to 60 s)
-r = system(concat(dsl_cli(p), ["--lmcode", out]), 600000);
-if (r.code != 0) { println(r.stderr + r.stdout); }
-assert(r.code == 0);
+r = run_lmcode(p);
+if (!r.ok) { println(r.stderr + r.stdout); }
+assert(r.ok);
 println("wrote images/lightbulb.png");
