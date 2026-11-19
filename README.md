@@ -4,6 +4,8 @@
 
 **One static executable that drives [Magnum](https://magnum.graphics) from [lmscript](https://lmctl.com/tools/lmscript/skill.html) `_lmcode_` blocks.** Build a scene from Magnum's primitives, render it with a built-in software rasterizer, and export PNG, PPM, STL, OBJ or PLY. No GPU, no window system, no shared libraries.
 
+**Documentation:** [lmctl.com/tools/lmmagnum](https://www.lmctl.com/tools/lmmagnum/) · [skill](https://www.lmctl.com/tools/lmmagnum/skill.html) · [guide](https://www.lmctl.com/tools/lmmagnum/guide.html) · [reference](https://www.lmctl.com/tools/lmmagnum/reference.html)
+
 ```sh
 npm install -g @lmctl-ai/lmctl
 lmscript examples/primitives.lms      # writes images/primitives.png
